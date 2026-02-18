@@ -1,1 +1,44 @@
+# Nullroom - Private P2P Messaging Application
 # See https://www.robotstxt.org/robotstxt.html for documentation on how to use the robots.txt file
+
+User-agent: *
+Allow: /
+
+# Disallow indexing of individual room URLs
+# Room URLs should remain private and not indexed
+# Even though fragments (#) are typically ignored by crawlers, we explicitly block the route
+Disallow: /rooms/
+
+# Disallow indexing of WebSocket endpoint
+Disallow: /cable
+
+# Disallow indexing of health check endpoint
+Disallow: /up
+
+# Allow privacy policy to be indexed
+Allow: /privacy
+
+# Common crawlers that may bypass default rules
+User-agent: AdsBot-Google
+Disallow: /rooms/
+Disallow: /cable
+Disallow: /up
+
+User-agent: MJ12bot
+Disallow: /rooms/
+Disallow: /cable
+Disallow: /up
+
+# Google Search Console crawlers - be explicit
+User-agent: Googlebot
+Disallow: /rooms/
+Disallow: /cable
+Disallow: /up
+
+# Slow down aggressive crawlers
+User-agent: *
+Crawl-delay: 10
+Request-rate: 1/5s
+
+# Sitemap (if you decide to add one in the future)
+# Sitemap: https://nullroom.io/sitemap.xml
