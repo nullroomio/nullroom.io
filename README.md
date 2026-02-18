@@ -100,6 +100,10 @@ Deployment is configured with Kamal. See:
 
 Production logging posture:
 
+## Security
+
+Please read our security policy and disclosure process in [SECURITY.md](SECURITY.md).
+
 
 ## License
 
