@@ -235,6 +235,7 @@ export default class extends Controller {
     this.clearWaitingPlaceholder()
 
     const timestamp = new Date().toLocaleTimeString()
+    const timestampClass = isMine ? "text-green-400" : "text-blue-400"
     const messageEl = document.createElement("div")
     messageEl.className = `px-3 py-2 text-xs font-mono ${
       isMine
@@ -243,7 +244,7 @@ export default class extends Controller {
     }`
 
     messageEl.innerHTML = `
-      <div class="text-gray-500 text-xs">${timestamp}</div>
+      <div class="${timestampClass} text-xs">${timestamp}</div>
       <div class="mt-1 break-words">${this.escapeHtml(text)}</div>
     `
 

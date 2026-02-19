@@ -5,10 +5,10 @@
       <h1 class="text-4xl font-bold font-mono text-green-400 tracking-wider">
         nullroom
       </h1>
-      <p class="text-md font-mono text-gray-400">
+      <p class="md:text-base text-sm font-mono text-gray-400">
         zero-trace, ephemeral, peer-to-peer messaging
       </p>
-      <p class="text-sm font-mono text-gray-500 mt-4 leading-relaxed">
+      <p class="md:text-sm text-xs font-mono text-gray-500 mt-4 leading-relaxed">
         Create a temporary room with end-to-end encryption. When you close the tab, all traces vanish.
       </p>
     </div>
@@ -17,7 +17,7 @@
     <button
       data-action="landing#createRoom"
       data-state="idle"
-      class="w-full px-6 py-3 font-mono text-md font-semibold bg-green-500 text-gray-900 hover:bg-green-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+      class="w-full px-6 py-3 font-mono md:text-base text-sm font-semibold bg-green-500 text-gray-900 hover:bg-green-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
     >
       <span data-landing-target="buttonText">Create Room</span>
     </button>
@@ -32,14 +32,14 @@
 
     <!-- Footer -->
     <div class="pt-8 border-t border-gray-700 space-y-2">
-      <div class="text-sm font-mono text-gray-400">🔐 End-to-end encrypted</div>
-      <div class="text-sm font-mono text-gray-400">⏱️ Expires in 30 minutes</div>
-      <div class="text-sm font-mono text-gray-400">🗑️ Zero server logs</div>
+      <div class="md:text-sm text-xs font-mono text-gray-400">🔐 End-to-end encrypted</div>
+      <div class="md:text-sm text-xs font-mono text-gray-400">⏱️ Expires in 30 minutes</div>
+      <div class="md:text-sm text-xs font-mono text-gray-400">🗑️ Zero server logs</div>
     </div>
 
     <!-- Info Link -->
     <div class="pt-4 text-center">
-      <%= link_to "Privacy Policy • FAQ", privacy_page_path, class: "text-gray-400 hover:text-gray-200 transition-colors text-sm font-mono", rel: "noreferrer" %>
+      <%= link_to "Privacy Policy • FAQ", privacy_page_path, class: "text-gray-400 hover:text-gray-200 transition-colors md:text-sm text-xs font-mono", rel: "noreferrer" %>
     </div>
   </div>
 </div>

@@ -36,7 +36,7 @@
 
   <!-- Share Section -->
   <div class="bg-gray-800 border-b border-gray-700 px-4 py-4">
-    <p class="text-sm font-mono text-gray-500 mb-2">📤 Share this link (encryption key is in the #)</p>
+    <p class="text-xs font-mono text-gray-500 mb-2">📤 Share this link (encryption key is in the #)</p>
     <div class="flex items-center space-x-2">
       <input
         data-room-target="shareLink"
@@ -47,7 +47,7 @@
       />
       <button
         data-action="room#copyLink"
-        class="px-3 py-2 bg-green-500 text-gray-900 text-xs font-mono font-semibold hover:bg-green-400 transition-colors"
+        class="px-3 py-2 bg-green-500 text-gray-900 text-xs font-mono font-semibold hover:bg-green-400 transition-colors cursor-pointer"
       >
         Copy
       </button>
@@ -73,15 +73,15 @@
       class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
     >
       <div class="bg-gray-800 border border-gray-700 p-6 max-w-sm text-center space-y-4">
-        <h2 class="text-lg font-mono font-bold text-red-400">
+        <h2 class="md:text-lg text-base font-mono font-bold text-red-400">
           🔒 Room Terminated
         </h2>
-        <p class="text-md font-mono text-gray-300">
+        <p class="md:text-base text-sm font-mono text-gray-300">
           One participant left. All traces are now cleared.
         </p>
         <button
           data-action="room#closeRoom"
-          class="w-full px-4 py-2 bg-red-600 text-white text-sm font-mono font-semibold hover:bg-red-700 transition-colors"
+          class="w-full px-4 py-2 bg-red-600 text-white md:text-sm text-xs font-mono font-semibold hover:bg-red-700 transition-colors"
         >
           Close
         </button>
@@ -103,7 +103,7 @@
       data-room-target="sendButton"
       data-action="room#sendMessage"
       disabled
-      class="px-4 py-2 bg-green-500 text-gray-900 text-xs font-mono font-semibold hover:bg-green-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      class="px-4 py-2 bg-green-500 text-gray-900 text-xs font-mono font-semibold hover:bg-green-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
     >
       Send
     </button>
