@@ -1,7 +1,7 @@
 <div class="max-w-md bg-gray-900 mx-auto py-12 px-6 text-white font-mono">
   <!-- Human Summary -->
   <div class="mb-8 p-6 bg-gray-900 border-l-4 border-blue-500 rounded">
-    <p class="text-sm font-semibold">
+    <p class="text-xs md:text-sm font-semibold">
         Our architecture is "Zero-Knowledge", meaning we do not have the technical capability to access your conversations.
     </p>
   </div>
@@ -10,36 +10,36 @@
   <section id="privacy-policy" class="mb-12">
     <h2 class="text-xl font-bold mb-4">Privacy Policy</h2>
     <div class="prose prose-invert max-w-none">
-      <h3 class="text-md font-semibold mt-6 mb-2">Our Privacy Philosophy</h3>
-      <p class="text-sm text-gray-300 leading-relaxed mb-4">
+      <h3 class="text-sm md:text-base font-semibold mt-6 mb-2">Our Privacy Philosophy</h3>
+      <p class="text-xs md:text-sm text-gray-300 leading-relaxed mb-4">
         At nullroom.io, our mission is to provide a "volatile space" for conversation
         without a digital footprint. We believe that privacy is not just about hiding data
         it is about the intentional non-existence of data.
       </p>
 
-      <h3 class="text-md font-semibold mt-6 mb-2">Data We Do Not Collect</h3>
-      <p class="text-sm text-gray-300 leading-relaxed mb-4">
+      <h3 class="text-sm md:text-base font-semibold mt-6 mb-2">Data We Do Not Collect</h3>
+      <p class="text-xs md:text-sm text-gray-300 leading-relaxed mb-4">
         <b>Personal Info:</b> No names, emails, phone numbers, or accounts.<br>
         <b>Message Content:</b> Messages are encrypted on your device and never travel through our servers in a readable format.<br>
         <b>IP Addresses:</b> Server logs are disabled for all room paths.<br>
         <b>Cookies:</b> No tracking or advertising cookies.
       </p>
 
-      <h3 class="text-md font-semibold mt-6 mb-2">Data We Process Temporarily</h3>
-      <p class="text-sm text-gray-300 leading-relaxed mb-4">
+      <h3 class="text-sm md:text-base font-semibold mt-6 mb-2">Data We Process Temporarily</h3>
+      <p class="text-xs md:text-sm text-gray-300 leading-relaxed mb-4">
         <b>Room UUIDs:</b> Stored in volatile memory (Redis) and purged after 30 minutes.<br>
         <b>Signaling Metadata:</b> Encrypted connection details are relayed during the handshake and never stored.
       </p>
 
-      <h3 class="text-md font-semibold mt-6 mb-2">Security Architecture</h3>
-      <p class="text-sm text-gray-300 leading-relaxed mb-4">
+      <h3 class="text-sm md:text-base font-semibold mt-6 mb-2">Security Architecture</h3>
+      <p class="text-xs md:text-sm text-gray-300 leading-relaxed mb-4">
         <b>End-to-End Encryption (E2EE):</b> Powered by the <b>Web Crypto API</b>.<br>
         <b>Peer-to-Peer (P2P):</b> Data travels directly via <b>WebRTC</b>.<br>
         <b>Client-Side Keys:</b> The key is in the URL fragment (`#`), which is never sent to our servers.
       </p>
 
-      <h3 class="text-md font-semibold mt-6 mb-2">Third Parties</h3>
-      <p class="text-sm text-gray-300 leading-relaxed mb-4">
+      <h3 class="text-sm md:text-base font-semibold mt-6 mb-2">Third Parties</h3>
+      <p class="text-xs md:text-sm text-gray-300 leading-relaxed mb-4">
         <b>Relays:</b> We use STUN/TURN (Cloudflare) for NAT traversal; they only see routing data, not content.<br>
         <b>Payments:</b> Handled by Stripe via a "Blind Token" system to decouple identity from chat.
       </p>
@@ -52,38 +52,38 @@
     <div class="prose prose-invert max-w-none space-y-4">
 
       <div>
-        <h3 class="text-md font-semibold text-gray-100">Journalists & Whistleblowers</h3>
-        <p class="text-sm text-gray-300 leading-relaxed mt-2">
+        <h3 class="text-sm md:text-base font-semibold text-gray-100">Journalists & Whistleblowers</h3>
+        <p class="text-xs md:text-sm text-gray-300 leading-relaxed mt-2">
           Ideal for high-stakes initial contact where installing a permanent app is a liability.
           The "zero-trace" architecture protects the pattern of communication from being discovered on a seized device.
         </p>
       </div>
 
       <div>
-        <h3 class="text-md font-semibold text-gray-100">Developers & IT Teams</h3>
-        <p class="text-sm text-gray-300 leading-relaxed mt-2">
+        <h3 class="text-sm md:text-base font-semibold text-gray-100">Developers & IT Teams</h3>
+        <p class="text-xs md:text-sm text-gray-300 leading-relaxed mt-2">
           Perfect for sharing one-time secrets, such as API keys, database credentials, or environment variables, that should never be stored in a persistent Slack or email history.
         </p>
       </div>
 
       <div>
-        <h3 class="text-md font-semibold text-gray-100">Privacy-Conscious Individuals</h3>
-        <p class="text-sm text-gray-300 leading-relaxed mt-2">
+        <h3 class="text-sm md:text-base font-semibold text-gray-100">Privacy-Conscious Individuals</h3>
+        <p class="text-xs md:text-sm text-gray-300 leading-relaxed mt-2">
           Useful for those wanting to avoid "Chat Control" or regulatory scanning.
           Provides a "blind" space for conversations that aren't tied to a phone number or email address.
         </p>
       </div>
 
       <div>
-        <h3 class="text-md font-semibold text-gray-100">One-Time Collaborators</h3>
-        <p class="text-sm text-gray-300 leading-relaxed mt-2">
+        <h3 class="text-sm md:text-base font-semibold text-gray-100">One-Time Collaborators</h3>
+        <p class="text-xs md:text-sm text-gray-300 leading-relaxed mt-2">
           Great for people who need to coordinate quickly—like a buyer and seller on a marketplace—without exchanging personal contact info or creating a permanent social link.
         </p>
       </div>
 
       <div>
-        <h3 class="text-md font-semibold text-gray-100">Travelers in Sensitive Regions</h3>
-        <p class="text-sm text-gray-300 leading-relaxed mt-2">
+        <h3 class="text-sm md:text-base font-semibold text-gray-100">Travelers in Sensitive Regions</h3>
+        <p class="text-xs md:text-sm text-gray-300 leading-relaxed mt-2">
           Safe for users in areas with heavy surveillance where the mere presence of a "privacy app" can be a risk.
           Since nullroom runs entirely in the browser and vanishes on tab-close, it leaves no icon or data footprint behind.
         </p>
@@ -98,10 +98,10 @@
     <div class="space-y-2">
 
       <details class="p-2 bg-gray-900 rounded cursor-pointer">
-        <summary class="text-md font-semibold text-gray-100 hover:text-blue-400">
+        <summary class="text-sm md:text-base font-semibold text-gray-100 hover:text-blue-400">
           Why nullroom over other encrypted messaging apps?
         </summary>
-        <p class="text-sm text-gray-300 mt-3 leading-relaxed">
+        <p class="text-xs md:text-sm text-gray-300 mt-3 leading-relaxed">
           <b>Traditional Apps:</b> Require you to install an app, verify a phone number, and create an account. You become a permanent contact in someone's database—even if you only wanted a one-time conversation.
           <br><br>
           <b>nullroom.io:</b> No app, no sign-up, no phone number, no account. Just click "Create Room", share a URL, and chat. The moment you close the tab, everything vanishes. Perfect for temporary conversations where onboarding friction would be a dealbreaker.
@@ -109,10 +109,10 @@
       </details>
 
       <details class="p-2 bg-gray-900 rounded cursor-pointer">
-        <summary class="text-md font-semibold text-gray-100 hover:text-blue-400">
+        <summary class="text-sm md:text-base font-semibold text-gray-100 hover:text-blue-400">
           What is "Zero-Trace" messaging?
         </summary>
-        <p class="text-sm text-gray-300 mt-3 leading-relaxed">
+        <p class="text-xs md:text-sm text-gray-300 mt-3 leading-relaxed">
           Most messaging apps store your history on their servers, even if it's encrypted. nullroom.io is designed to leave no trace:
           <ul class="list-disc list-inside mt-2">
             <li>No Accounts: We don't ask for your name, email, or phone number.</li>
@@ -123,10 +123,10 @@
       </details>
 
       <details class="p-2 bg-gray-900 rounded cursor-pointer">
-        <summary class="text-md font-semibold text-gray-100 hover:text-blue-400">
+        <summary class="text-sm md:text-base font-semibold text-gray-100 hover:text-blue-400">
           How does the security work?
         </summary>
-        <p class="text-sm text-gray-300 mt-3 leading-relaxed">
+        <p class="text-xs md:text-sm text-gray-300 mt-3 leading-relaxed">
           We use two core browser technologies to keep you safe:
           <ol class="list-decimal list-inside mt-2">
             <li>WebRTC (Peer-to-Peer): This technology allows your device to talk directly to your friend's device. Instead of your messages traveling through our servers, they take the most direct path across the internet.</li>
@@ -136,10 +136,10 @@
       </details>
 
       <details class="p-2 bg-gray-900 rounded cursor-pointer">
-        <summary class="text-md font-semibold text-gray-100 hover:text-blue-400">
+        <summary class="text-sm md:text-base font-semibold text-gray-100 hover:text-blue-400">
           If you don't have the keys, who does?
         </summary>
-        <p class="text-sm text-gray-300 mt-3 leading-relaxed">
+        <p class="text-xs md:text-sm text-gray-300 mt-3 leading-relaxed">
           Only you and your peer.
           When you create a room, your browser generates a secret key.
           This key is appended to the URL after the # symbol.
@@ -149,40 +149,40 @@
       </details>
 
       <details class="p-2 bg-gray-900 rounded cursor-pointer">
-        <summary class="text-md font-semibold text-gray-100 hover:text-blue-400">
+        <summary class="text-sm md:text-base font-semibold text-gray-100 hover:text-blue-400">
           How long are rooms available?
         </summary>
-        <p class="text-sm text-gray-300 mt-3 leading-relaxed">
+        <p class="text-xs md:text-sm text-gray-300 mt-3 leading-relaxed">
           By default, rooms are strictly ephemeral and expire after 30 minutes of inactivity.
           Our Redis-backed "self-destruct" timer ensures that once the room expires, the signaling data is permanently purged from our volatile memory.
         </p>
       </details>
 
       <details class="p-2 bg-gray-900 rounded cursor-pointer">
-        <summary class="text-md font-semibold text-gray-100 hover:text-blue-400">
+        <summary class="text-sm md:text-base font-semibold text-gray-100 hover:text-blue-400">
           How many users can chat in a room?
         </summary>
-        <p class="text-sm text-gray-300 mt-3 leading-relaxed">
+        <p class="text-xs md:text-sm text-gray-300 mt-3 leading-relaxed">
           nullroom is optimized for private, 1-on-1 conversations; therefore, each room is limited to two participants.
           Our backend enforces a "Room Capacity Lock" to prevent third parties from joining an active session.
         </p>
       </details>
 
       <details class="p-2 bg-gray-900 rounded cursor-pointer">
-        <summary class="text-md font-semibold text-gray-100 hover:text-blue-400">
+        <summary class="text-sm md:text-base font-semibold text-gray-100 hover:text-blue-400">
           Can I access a room from multiple devices?
         </summary>
-        <p class="text-sm text-gray-300 mt-3 leading-relaxed">
+        <p class="text-xs md:text-sm text-gray-300 mt-3 leading-relaxed">
           No. Because the encryption key is generated locally and stored in your browser's URL fragment (#), it never leaves your device.
           To keep the "Zero Trace" promise, the key is not synced to any cloud service; you must have the specific URL with the fragment on the device you wish to use.
         </p>
       </details>
 
       <details class="p-2 bg-gray-900 rounded cursor-pointer">
-        <summary class="text-md font-semibold text-gray-100 hover:text-blue-400">
+        <summary class="text-sm md:text-base font-semibold text-gray-100 hover:text-blue-400">
           Is Nullroom open source?
         </summary>
-        <p class="text-sm text-gray-300 mt-3 leading-relaxed">
+        <p class="text-xs md:text-sm text-gray-300 mt-3 leading-relaxed">
           Soon, it will be.
         </p>
       </details>
@@ -191,6 +191,6 @@
 
   <!-- Back to Home -->
   <div class="mt-12 pt-8 border-t border-gray-700">
-    <%= link_to "← Back to Room Creator", root_path, class: "inline-block text-blue-400 hover:text-blue-300" %>
+    <%= link_to "← Back to Room Creator", root_path, class: "inline-block md:text-sm text-xs text-blue-400 hover:text-blue-300" %>
   </div>
 </div>
