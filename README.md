@@ -84,6 +84,18 @@ These are planned but **not fully implemented yet**:
 - Web Crypto API (AES-GCM)
 - SQLite (default app DB)
 
+## Configuration
+
+### Room lifecycle behavior
+
+By default, rooms are destroyed immediately when any peer leaves, preventing rejoins via browser history.
+
+To allow peers to rejoin (room stays active until TTL expires), edit [`config/initializers/nullroom.rb`](config/initializers/nullroom.rb):
+
+```ruby
+DESTROY_ROOM_ON_PEER_LEAVE = false  # Allow rejoin via browser history
+```
+
 ## Key routes
 
 - `GET /` → room landing page

@@ -51,14 +51,28 @@ class RoomsChannel < ApplicationCable::Channel
   def unsubscribed
     return unless @room_id && @joined
 
-    # Decrement counter when someone leaves
-    remaining = REDIS.decr("room:#{@room_id}:count")
-    return unless remaining && remaining >= 1
+    room_key = "room:#{@room_id}"
+    count_key = "room:#{@room_id}:count"
 
-    # Notify the other peer that we're leaving
-    ActionCable.server.broadcast(
-      "rooms:#{@room_id}",
-      { type: "peer_left", connection_id: @connection_id }
-    )
+    # Ignore duplicate unsubscribe callbacks after room has already been destroyed.
+    return unless REDIS.exists?(room_key)
+
+    # Decrement counter so we know if another peer is still present.
+    remaining = REDIS.decr(count_key)
+
+    # Notify the remaining peer that we're leaving before destroying room keys.
+    if remaining && remaining >= 1
+      ActionCable.server.broadcast(
+        "rooms:#{@room_id}",
+        { type: "peer_left", connection_id: @connection_id }
+      )
+    end
+
+    # Optionally destroy room immediately when any peer leaves (prevents rejoin via browser history).
+    # When disabled, room remains active until TTL expires.
+    if Nullroom::Config::DESTROY_ROOM_ON_PEER_LEAVE
+      REDIS.del(room_key)
+      REDIS.del(count_key)
+    end
   end
 end
