@@ -1,0 +1,38 @@
+<%# Renders the nullroom.io logo mark: null-set SVG + wordmark.
+    Accepts locals: size (default "md"), link (default true)
+    size "sm" → 20px icon / text-base
+    size "md" → 24px icon / text-xl
+    size "lg" → 32px icon / text-2xl
+%>
+<% _size  = local_assigns.fetch(:size, "md") %>
+<% _link  = local_assigns.fetch(:link, true) %>
+<% _icon_sizes = { "sm" => "20", "md" => "24", "lg" => "32" } %>
+<% _text_sizes = { "sm" => "text-base", "md" => "text-xl", "lg" => "text-2xl" } %>
+<% _w = _icon_sizes[_size] %>
+<% _t = _text_sizes[_size] %>
+
+<% _content = capture do %>
+  <span class="flex items-center gap-2 text-trace-white">
+    <%# Null-set ∅ — thin-stroke circle with 45° diagonal slash %>
+    <svg
+      width="<%= _w %>" height="<%= _w %>"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="9"/>
+      <line x1="5.3" y1="18.7" x2="18.7" y2="5.3"/>
+    </svg>
+    <span class="<%= _t %> font-sans font-light tracking-tight">nullroom.io</span>
+  </span>
+<% end %>
+
+<% if _link %>
+  <%= link_to _content, root_path, class: "inline-flex items-center hover:opacity-80 transition-opacity" %>
+<% else %>
+  <%= _content %>
+<% end %>

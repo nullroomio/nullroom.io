@@ -284,6 +284,26 @@ export default class extends Controller {
     }
   }
 
+  // Destroy Room button: notify peer, clean up, and return home.
+  destroyRoom() {
+    if (this.state.timerInterval) {
+      clearInterval(this.state.timerInterval)
+    }
+
+    if (this.state.peer) {
+      this.state.peer.destroy()
+    }
+
+    // Removing the subscription triggers unsubscribed on the server,
+    // which broadcasts peer_left to the other participant.
+    if (this.channel) {
+      window.cable.subscriptions.remove(this.channel)
+      this.channel = null
+    }
+
+    window.location.href = "/"
+  }
+
   // Return to the landing page after termination.
   closeRoom() {
     window.location.href = "/"
