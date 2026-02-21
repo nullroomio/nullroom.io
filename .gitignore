@@ -42,3 +42,5 @@
 !/app/assets/builds/.keep
 
 /local/*
+
+/.github/skills/
