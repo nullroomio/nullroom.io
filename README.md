@@ -105,13 +105,6 @@ DESTROY_ROOM_ON_PEER_LEAVE = false  # Allow rejoin via browser history
 - `GET /up` → app + Redis health check
 - `GET /cable` → ActionCable endpoint
 
-## Deployment
-
-Deployment is configured with Kamal. See:
-
-
-Production logging posture:
-
 ## Security
 
 Please read our security policy and disclosure process in [SECURITY.md](SECURITY.md).
