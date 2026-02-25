@@ -102,6 +102,48 @@
       </button>
     </div>
 
+    <%# ── File Transfer Zone (hidden until P2P connected + file_sharing enabled) ── %>
+    <div
+      data-room-target="fileZone"
+      class="hidden px-5 pb-4"
+    >
+      <%# Drop / click area %>
+      <div
+        data-action="dragover->room#preventDrop drop->room#handleDrop click->room#triggerFileInput"
+        class="relative flex items-center justify-center gap-2 px-4 py-3 rounded-lg border border-dashed border-white/20 text-secure-gray hover:border-status-blue hover:text-trace-white transition-colors cursor-pointer select-none"
+      >
+        <%= render "shared/icon", name: "paperclip", css: "w-4 h-4 shrink-0" %>
+        <span class="text-xs font-mono">
+          Drop a file or click to select
+          <span class="text-white/30">(max 24 MB)</span>
+        </span>
+        <%# Invisible native file picker layered over the styled div %>
+        <input
+          data-room-target="fileInput"
+          data-action="change->room#uploadFile"
+          type="file"
+          class="absolute inset-0 opacity-0 cursor-pointer"
+          tabindex="-1"
+          aria-hidden="true"
+        />
+      </div>
+
+      <%# Progress bar (hidden until a transfer is in flight) %>
+      <div data-room-target="fileProgress" class="hidden mt-2 space-y-1">
+        <span
+          data-room-target="fileProgressLabel"
+          class="block text-xs font-mono text-secure-gray truncate"
+        >Transferring…</span>
+        <div class="h-1 bg-white/10 rounded-full overflow-hidden">
+          <div
+            data-room-target="fileProgressBar"
+            class="h-full bg-status-blue rounded-full transition-all duration-200"
+            style="width: 0%"
+          ></div>
+        </div>
+      </div>
+    </div>
+
   </div><%# /glass card %>
 
   <%# ── Room Terminated Modal (initially hidden) ─────────────────────── %>

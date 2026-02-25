@@ -1,6 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 import PeerConnection from "modules/peer_connection"
-import { importKey, encrypt, decrypt } from "modules/encryption"
+import { importKey, encrypt, decrypt, encryptBuffer, decryptBuffer } from "modules/encryption"
+import { FileTransferSender, FileTransferReceiver, FILE_SIZE_LIMIT } from "modules/file_transfer"
 
 // Manages room lifecycle, signaling, and P2P encrypted messaging UI.
 export default class extends Controller {
@@ -15,7 +16,13 @@ export default class extends Controller {
     "shareLink",
     "terminatedModal",
     "errorToast",
-    "errorToastText"
+    "errorToastText",
+    // File transfer
+    "fileZone",
+    "fileInput",
+    "fileProgress",
+    "fileProgressBar",
+    "fileProgressLabel"
   ]
 
   static values = {
@@ -34,8 +41,13 @@ export default class extends Controller {
       peer: null,
       channel: null,
       timer: null,
-      connectionId: null // Store our connection ID
+      connectionId: null, // Store our connection ID
+      // File transfer
+      fileSharing: false,
+      pendingFile: null
     }
+    this.sender   = null
+    this.receiver = null
 
     // Populate share link with full URL including hash
     if (this.hasShareLinkTarget) {
@@ -104,16 +116,28 @@ export default class extends Controller {
 
     // Handle peer connection established
     this.state.peer.on("connect", () => {
+      if (this.state.p2p) return // guard against duplicate connect events
       this.updateStatus(true, "🔒 Secure P2P")
       this.clearWaitingPlaceholder()
       this.messageInputTarget.disabled = false
       this.sendButtonTarget.disabled = false
       this.messageInputTarget.focus()
+      // Initialise file transfer if the server flagged it as available
+      if (this.state.fileSharing) {
+        this._initFileTransfer()
+      }
     })
 
     // Handle DataChannel open
     this.state.peer.on("data", (data) => {
       this.handleIncomingMessage(data)
+    })
+
+    // Handle incoming file chunks from the dedicated file channel
+    this.state.peer.on("file-data", (data) => {
+      if (this.receiver) {
+        this.receiver.handleChunk(data)
+      }
     })
 
     // Handle peer close or error (Heartbeat: immediate UI scrub)
@@ -149,7 +173,8 @@ export default class extends Controller {
           if (data.type === "init") {
             // Store our connection ID and initialize peer
             this.state.connectionId = data.connection_id
-            console.log("[Room] Got init message, initiator:", data.initiator, "connection_id:", data.connection_id)
+            this.state.fileSharing  = data.file_sharing === true
+            console.log("[Room] Got init message, initiator:", data.initiator, "connection_id:", data.connection_id, "file_sharing:", this.state.fileSharing)
             this.initializePeer(data.initiator)
           } else if (data.type === "peer_ready") {
             // Second peer is ready, initiator can now create offer
@@ -164,6 +189,23 @@ export default class extends Controller {
               return
             }
             this.handlePeerClosed()
+          } else if (data.type === "file_transfer_authorized") {
+            // Server approved the transfer — start sending over the DataChannel
+            if (this.state.pendingFile && this.sender) {
+              const file = this.state.pendingFile
+              this.state.pendingFile = null
+              // Await completion then show a sent-confirmation bubble on the sender side.
+              // The sender already has the file locally so no download link is needed.
+              this.sender.send(file).then(() => {
+                this.appendFileDownload({ name: file.name, url: null, size: file.size, isSent: true })
+              }).catch((err) => {
+                console.error("[Room] File send error:", err)
+                this.showError("File transfer failed.")
+              })
+            }
+          } else if (data.type === "file_transfer_error") {
+            this.state.pendingFile = null
+            this.showError(data.error || "File transfer rejected.")
           } else if (data.type === "signal") {
             // Ignore signals from ourselves
             if (data.connection_id === this.state.connectionId) {
@@ -264,6 +306,7 @@ export default class extends Controller {
   // Handle peer disconnect by scrubbing UI and ending the session.
   handlePeerClosed() {
     this.state.roomTerminated = true
+    this.state.pendingFile    = null
 
     // Clear messages from DOM immediately
     this.messagesContainerTarget.innerHTML = ""
@@ -274,6 +317,13 @@ export default class extends Controller {
     // Disable input and send button
     this.messageInputTarget.disabled = true
     this.sendButtonTarget.disabled = true
+
+    // Hide file transfer zone
+    if (this.hasFileZoneTarget) {
+      this.fileZoneTarget.classList.add("hidden")
+    }
+    this.sender   = null
+    this.receiver = null
 
     // Show termination modal
     this.terminatedModalTarget.classList.remove("hidden")
@@ -384,6 +434,154 @@ export default class extends Controller {
       this.errorToastTarget.classList.add("hidden")
     }, 5000)
   }
+
+  // ── File Transfer ─────────────────────────────────────────────────────────
+
+  /** Proxy a click on the invisible <input type="file"> from the drop zone. */
+  triggerFileInput() {
+    if (this.hasFileInputTarget) {
+      this.fileInputTarget.click()
+    }
+  }
+
+  /** Called when the user selects a file via the file picker. */
+  uploadFile(event) {
+    const file = event.target.files && event.target.files[0]
+    event.target.value = "" // reset so the same file can be re-selected
+    if (file) this._requestFileTransfer(file)
+  }
+
+  /** Called when the user drops a file onto the drop zone. */
+  handleDrop(event) {
+    event.preventDefault()
+    const file = event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]
+    if (file) this._requestFileTransfer(file)
+  }
+
+  /** Prevent the browser from navigating away on dragover. */
+  preventDrop(event) {
+    event.preventDefault()
+  }
+
+  /**
+   * Client-side size guard, then ask the server to authorise the transfer.
+   * Actual bytes travel P2P; the server only sees the metadata for the gate check.
+   */
+  _requestFileTransfer(file) {
+    if (this.state.roomTerminated || !this.state.p2p) return
+    if (file.size > FILE_SIZE_LIMIT) {
+      this.showError("Files must be under 24 MB.")
+      return
+    }
+    // Store the file and ask the server gate
+    this.state.pendingFile = file
+    if (this.channel) {
+      this.channel.perform("initiate_file_transfer", {
+        metadata: { file_name: file.name, file_size: file.size }
+      })
+    }
+  }
+
+  /** Instantiate sender + receiver and reveal the file zone after P2P connects. */
+  _initFileTransfer() {
+    const encryptFn = (buf) => encryptBuffer(buf, this.state.encryptionKey)
+    const decryptFn = (buf) => decryptBuffer(buf, this.state.encryptionKey)
+
+    this.sender = new FileTransferSender(
+      this.state.peer,
+      encryptFn,
+      (name, percent) => this.updateFileProgress(name, percent),
+      (msg) => this.showError(msg)
+    )
+
+    this.receiver = new FileTransferReceiver(
+      decryptFn,
+      (name, percent) => this.updateFileProgress(name, percent),
+      (file) => this.appendFileDownload(file)
+    )
+
+    // Reveal the file drop zone
+    if (this.hasFileZoneTarget) {
+      this.fileZoneTarget.classList.remove("hidden")
+    }
+  }
+
+  /** Update the progress bar and label. Hides the bar once transfer completes. */
+  updateFileProgress(name, percent) {
+    if (!this.hasFileProgressTarget) return
+
+    this.fileProgressTarget.classList.remove("hidden")
+    this.fileProgressBarTarget.style.width = `${percent}%`
+    this.fileProgressLabelTarget.textContent =
+      percent < 100 ? `${name} — ${percent}%` : `${name} — complete`
+
+    if (percent >= 100) {
+      setTimeout(() => {
+        if (this.hasFileProgressTarget) {
+          this.fileProgressTarget.classList.add("hidden")
+          this.fileProgressBarTarget.style.width = "0%"
+        }
+      }, 1500)
+    }
+  }
+
+  /**
+   * Append a file bubble to the message thread.
+   * Sent files (isSent=true) render as outgoing (green, right-aligned, no download link).
+   * Received files render as incoming (blue, left-aligned, clickable download link).
+   * @param {{name: string, url: string|null, size: number, isSent?: boolean}} fileInfo
+   */
+  appendFileDownload({ name, url, size, isSent = false }) {
+    this.clearWaitingPlaceholder()
+
+    const timestamp    = new Date().toLocaleTimeString()
+    const paperclipSVG = `<svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="1.5"
+         stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+    </svg>`
+
+    const el = document.createElement("div")
+
+    if (isSent) {
+      // Outgoing: matches sent text message style — green, pushed to the right
+      el.className = "px-3 py-2 text-xs font-mono bg-green-900 bg-opacity-20 text-green-300 ml-8"
+      el.innerHTML = `
+        <div class="text-green-400 text-xs">${timestamp}</div>
+        <div class="mt-1 flex items-center gap-2 break-all">
+          ${paperclipSVG}
+          ${this.escapeHtml(name)} <span class="text-white/40">(${this.formatFileSize(size)})</span>
+          <span class="text-green-500/60 text-xs ml-1">✓ sent</span>
+        </div>
+      `
+    } else {
+      // Incoming: blue bubble with a clickable download anchor
+      el.className = "px-3 py-2 text-xs font-mono bg-blue-900 bg-opacity-20 text-blue-300 mr-8"
+      el.innerHTML = `
+        <div class="text-blue-400 text-xs">${timestamp}</div>
+        <a
+          href="${url}"
+          download="${this.escapeHtml(name)}"
+          class="mt-1 flex items-center gap-2 underline hover:text-blue-200 break-all"
+        >
+          ${paperclipSVG}
+          ${this.escapeHtml(name)} <span class="text-white/40">(${this.formatFileSize(size)})</span>
+        </a>
+      `
+    }
+
+    this.messagesContainerTarget.appendChild(el)
+    this.messagesContainerTarget.scrollTop = this.messagesContainerTarget.scrollHeight
+  }
+
+  /** Format bytes into a human-readable string (KB / MB). */
+  formatFileSize(bytes) {
+    if (bytes < 1024)          return `${bytes} B`
+    if (bytes < 1_048_576)     return `${(bytes / 1024).toFixed(1)} KB`
+    return `${(bytes / 1_048_576).toFixed(1)} MB`
+  }
+
+  // ── Utilities ─────────────────────────────────────────────────────────────
 
   // Escape user-provided text before injecting into the DOM.
   escapeHtml(text) {
