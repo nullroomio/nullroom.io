@@ -191,6 +191,61 @@ class RoomsChannelTest < ActionCable::Channel::TestCase
     end
   end
 
+  test "init message includes file_sharing flag set to true" do
+    room_id = "room-file-sharing"
+    redis = InMemoryRedis.new(
+      "room:#{room_id}" => "active",
+      "room:#{room_id}:count" => "0"
+    )
+
+    with_stubbed_redis(redis) do
+      subscribe room_id: room_id
+
+      assert subscription.confirmed?
+
+      init_payload = transmissions.last.deep_symbolize_keys
+      assert_equal "init", init_payload[:type]
+      assert init_payload[:file_sharing], "expected file_sharing to be true in the init message"
+    end
+  end
+
+  test "initiate_file_transfer authorises and transmits authorized for files within the 25 MB limit" do
+    room_id = "room-file-ok"
+    redis = InMemoryRedis.new(
+      "room:#{room_id}" => "active",
+      "room:#{room_id}:count" => "0"
+    )
+
+    with_stubbed_redis(redis) do
+      subscribe room_id: room_id
+      assert subscription.confirmed?
+
+      perform :initiate_file_transfer, { "metadata" => { "file_name" => "photo.jpg", "file_size" => 10_000_000 } }
+
+      response = transmissions.last.deep_symbolize_keys
+      assert_equal "file_transfer_authorized", response[:type]
+    end
+  end
+
+  test "initiate_file_transfer rejects and transmits error for files exceeding the 25 MB limit" do
+    room_id = "room-file-too-large"
+    redis = InMemoryRedis.new(
+      "room:#{room_id}" => "active",
+      "room:#{room_id}:count" => "0"
+    )
+
+    with_stubbed_redis(redis) do
+      subscribe room_id: room_id
+      assert subscription.confirmed?
+
+      perform :initiate_file_transfer, { "metadata" => { "file_name" => "huge.zip", "file_size" => 30_000_000 } }
+
+      response = transmissions.last.deep_symbolize_keys
+      assert_equal "file_transfer_error", response[:type]
+      assert_includes response[:error], "24 MB"
+    end
+  end
+
   test "destroys room keys without broadcasting when last peer unsubscribes" do
     room_id = "room-last-peer"
     redis = InMemoryRedis.new(

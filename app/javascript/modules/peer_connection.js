@@ -56,10 +56,15 @@ export class PeerConnection {
       this._createDataChannel()
       // Offer will be created manually via createOffer() method
     } else {
-      // If not initiator, wait for data channel
+      // If not initiator, wait for data channel(s) opened by the initiator
       this.pc.ondatachannel = (event) => {
-        this.dataChannel = event.channel
-        this._setupDataChannel()
+        if (event.channel.label === "nullroom-files") {
+          this.fileChannel = event.channel
+          this._setupFileChannel()
+        } else {
+          this.dataChannel = event.channel
+          this._setupDataChannel()
+        }
       }
     }
   }
@@ -69,6 +74,12 @@ export class PeerConnection {
       ordered: true
     })
     this._setupDataChannel()
+
+    // Dedicated channel for P2P file transfer (binary, ordered)
+    this.fileChannel = this.pc.createDataChannel("nullroom-files", {
+      ordered: true
+    })
+    this._setupFileChannel()
   }
 
   _setupDataChannel() {
@@ -87,6 +98,23 @@ export class PeerConnection {
 
     this.dataChannel.onmessage = (event) => {
       this._emit("data", event.data)
+    }
+  }
+
+  _setupFileChannel() {
+    this.fileChannel.binaryType = "arraybuffer"
+
+    this.fileChannel.onopen = () => {
+      console.log("[PeerConnection] File channel open")
+      this._emit("file-channel-ready")
+    }
+
+    this.fileChannel.onmessage = (event) => {
+      this._emit("file-data", event.data)
+    }
+
+    this.fileChannel.onerror = (error) => {
+      console.warn("[PeerConnection] File channel error:", error)
     }
   }
 
@@ -152,6 +180,14 @@ export class PeerConnection {
     }
   }
 
+  sendFile(data) {
+    if (this.fileChannel && this.fileChannel.readyState === "open") {
+      this.fileChannel.send(data)
+    } else {
+      console.warn("[PeerConnection] File channel not ready, cannot send file data")
+    }
+  }
+
   // Public method to manually create offer (for initiator)
   createOffer() {
     if (!this.dataChannel) {
@@ -177,6 +213,9 @@ export class PeerConnection {
   destroy() {
     if (this.dataChannel) {
       this.dataChannel.close()
+    }
+    if (this.fileChannel) {
+      this.fileChannel.close()
     }
     if (this.pc) {
       this.pc.close()

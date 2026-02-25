@@ -21,6 +21,18 @@
 
     <%# ── Glass card ──────────────────────────────────────────────────── %>
     <div class="glass mt-10 w-full max-w-sm px-8 py-8 flex flex-col items-center gap-5">
+
+      <%# ── Beta file transfer badge ────────────────────────────────────── %>
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 backdrop-blur-md">
+        <span class="relative flex h-2 w-2">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+        </span>
+        <span class="text-[10px] font-mono font-bold uppercase tracking-widest text-emerald-500">
+          Beta: P2P File Transfers (Max 24&nbsp;MB)
+        </span>
+      </div>
+
       <span class="font-mono text-xs text-secure-gray tracking-widest">// INITIALIZE_SESSION</span>
 
       <%# Create Room button — all Stimulus targets/actions preserved %>

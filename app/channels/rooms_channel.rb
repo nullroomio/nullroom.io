@@ -28,7 +28,7 @@ class RoomsChannel < ApplicationCable::Channel
 
     # Send initialization message with initiator status
     # First person (count=1) is initiator, second person (count=2) is not
-    transmit({ type: "init", initiator: count == 1, connection_id: @connection_id })
+    transmit({ type: "init", initiator: count == 1, connection_id: @connection_id, file_sharing: true })
 
     # If we're the second person, notify first person that we're ready
     if count == 2
@@ -74,5 +74,31 @@ class RoomsChannel < ApplicationCable::Channel
       REDIS.del(room_key)
       REDIS.del(count_key)
     end
+  end
+
+  # Called by the client before starting a DataChannel file transfer.
+  # Acts as the server-side gate: authorises or rejects based on metadata.
+  # Actual file bytes NEVER touch the server — they travel P2P over the DataChannel.
+  def initiate_file_transfer(data)
+    if authorized_for_file_transfer?(data["metadata"])
+      # Authorised — let the client proceed with the DataChannel transfer
+      transmit({ type: "file_transfer_authorized" })
+    else
+      # Soft rejection — only the requesting sender receives this
+      transmit({ type: "file_transfer_error", error: "Beta limit exceeded: Files must be under 24 MB." })
+    end
+  end
+
+  private
+
+  # Stubbed gate for the Beta phase.
+  # The structure is ready for Blind Token (JWT) enforcement in the Pro launch.
+  def authorized_for_file_transfer?(metadata)
+    # 1. Enforce the Beta size limit (24 MiB)
+    return false if metadata.to_h["file_size"].to_i > 25_165_824
+
+    # 2. TODO: Implement BlindSignatureService.verify?(token, sig) for Pro launch.
+    #    For now, all P2P file transfers are permitted during the Beta phase.
+    true
   end
 end

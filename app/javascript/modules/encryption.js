@@ -137,3 +137,59 @@ export async function decrypt(encryptedString, key) {
     throw error
   }
 }
+
+/**
+ * Encrypt a binary ArrayBuffer with AES-GCM.
+ * Returns a new ArrayBuffer of the form: IV (12 bytes) || ciphertext.
+ * Used for per-chunk file transfer encryption.
+ * @param {ArrayBuffer} buffer Binary data to encrypt
+ * @param {CryptoKey} key Encryption key
+ * @returns {Promise<ArrayBuffer>}
+ */
+export async function encryptBuffer(buffer, key) {
+  try {
+    const iv = crypto.getRandomValues(new Uint8Array(12))
+
+    const ciphertextBuffer = await crypto.subtle.encrypt(
+      { name: "AES-GCM", iv: iv },
+      key,
+      buffer
+    )
+
+    // Combine IV + ciphertext into a single ArrayBuffer
+    const combined = new Uint8Array(12 + ciphertextBuffer.byteLength)
+    combined.set(iv, 0)
+    combined.set(new Uint8Array(ciphertextBuffer), 12)
+
+    return combined.buffer
+  } catch (error) {
+    console.error("Error encrypting buffer:", error)
+    throw error
+  }
+}
+
+/**
+ * Decrypt an ArrayBuffer whose first 12 bytes are the AES-GCM IV.
+ * Counterpart to encryptBuffer.
+ * @param {ArrayBuffer} buffer IV (12 bytes) || ciphertext
+ * @param {CryptoKey} key Decryption key
+ * @returns {Promise<ArrayBuffer>} Decrypted plaintext as ArrayBuffer
+ */
+export async function decryptBuffer(buffer, key) {
+  try {
+    const bytes = new Uint8Array(buffer)
+    const iv = bytes.slice(0, 12)
+    const ciphertext = bytes.slice(12).buffer
+
+    const plaintextBuffer = await crypto.subtle.decrypt(
+      { name: "AES-GCM", iv: iv },
+      key,
+      ciphertext
+    )
+
+    return plaintextBuffer
+  } catch (error) {
+    console.error("Error decrypting buffer:", error)
+    throw error
+  }
+}
