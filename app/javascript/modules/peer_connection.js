@@ -11,8 +11,10 @@ export class PeerConnection {
 
     this.pc = null
     this.dataChannel = null
+    this.fileChannel = null
     this.listeners = {}
     this._connected = false
+    this._pendingCandidates = []
 
     this._init()
   }
@@ -158,17 +160,34 @@ export class PeerConnection {
       if (data.type === "offer") {
         console.log("[PeerConnection] Setting remote description (offer)")
         await this.pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
+        await this._flushPendingCandidates()
         await this._createAnswer()
       } else if (data.type === "answer") {
         console.log("[PeerConnection] Setting remote description (answer)")
         await this.pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
+        await this._flushPendingCandidates()
       } else if (data.type === "candidate" && data.candidate) {
-        console.log("[PeerConnection] Adding ICE candidate")
-        await this.pc.addIceCandidate(new RTCIceCandidate(data.candidate))
+        if (this.pc.remoteDescription && this.pc.remoteDescription.type) {
+          console.log("[PeerConnection] Adding ICE candidate")
+          await this.pc.addIceCandidate(new RTCIceCandidate(data.candidate))
+        } else {
+          this._pendingCandidates.push(data.candidate)
+        }
       }
     } catch (error) {
       console.error("[PeerConnection] Error processing signal:", error)
       this._emit("error", error)
+    }
+  }
+
+  async _flushPendingCandidates() {
+    if (!this._pendingCandidates.length) return
+
+    const queued = this._pendingCandidates
+    this._pendingCandidates = []
+
+    for (const candidate of queued) {
+      await this.pc.addIceCandidate(new RTCIceCandidate(candidate))
     }
   }
 
