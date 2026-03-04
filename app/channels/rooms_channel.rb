@@ -28,7 +28,13 @@ class RoomsChannel < ApplicationCable::Channel
 
     # Send initialization message with initiator status
     # First person (count=1) is initiator, second person (count=2) is not
-    transmit({ type: "init", initiator: count == 1, connection_id: @connection_id, file_sharing: true })
+    transmit({
+      type: "init",
+      initiator: count == 1,
+      connection_id: @connection_id,
+      file_sharing: true,
+      file_size_limit: Nullroom::Config::FILE_TRANSFER_SIZE_LIMIT_BYTES
+    })
 
     # If we're the second person, notify first person that we're ready
     if count == 2
@@ -85,7 +91,10 @@ class RoomsChannel < ApplicationCable::Channel
       transmit({ type: "file_transfer_authorized" })
     else
       # Soft rejection — only the requesting sender receives this
-      transmit({ type: "file_transfer_error", error: "Beta limit exceeded: Files must be under 24 MB." })
+      transmit({
+        type: "file_transfer_error",
+        error: "Beta limit exceeded: Files must be under #{file_limit_label}."
+      })
     end
   end
 
@@ -94,11 +103,17 @@ class RoomsChannel < ApplicationCable::Channel
   # Stubbed gate for the Beta phase.
   # The structure is ready for Blind Token (JWT) enforcement in the Pro launch.
   def authorized_for_file_transfer?(metadata)
-    # 1. Enforce the Beta size limit (24 MiB)
-    return false if metadata.to_h["file_size"].to_i > 25_165_824
+    # 1. Enforce the Beta size limit.
+    return false if metadata.to_h["file_size"].to_i > Nullroom::Config::FILE_TRANSFER_SIZE_LIMIT_BYTES
 
     # 2. TODO: Implement BlindSignatureService.verify?(token, sig) for Pro launch.
     #    For now, all P2P file transfers are permitted during the Beta phase.
     true
+  end
+
+  def file_limit_label
+    bytes = Nullroom::Config::FILE_TRANSFER_SIZE_LIMIT_BYTES
+    mebibytes = bytes / 1024.0 / 1024.0
+    mebibytes.round == mebibytes ? "#{mebibytes.to_i} MB" : "#{mebibytes.round(1)} MB"
   end
 end

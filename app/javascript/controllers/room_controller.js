@@ -44,7 +44,8 @@ export default class extends Controller {
       connectionId: null, // Store our connection ID
       // File transfer
       fileSharing: false,
-      pendingFile: null
+      pendingFile: null,
+      fileSizeLimit: FILE_SIZE_LIMIT
     }
     this.sender   = null
     this.receiver = null
@@ -174,6 +175,7 @@ export default class extends Controller {
             // Store our connection ID and initialize peer
             this.state.connectionId = data.connection_id
             this.state.fileSharing  = data.file_sharing === true
+            this.state.fileSizeLimit = Number(data.file_size_limit) > 0 ? Number(data.file_size_limit) : FILE_SIZE_LIMIT
             console.log("[Room] Got init message, initiator:", data.initiator, "connection_id:", data.connection_id, "file_sharing:", this.state.fileSharing)
             this.initializePeer(data.initiator)
           } else if (data.type === "peer_ready") {
@@ -469,8 +471,8 @@ export default class extends Controller {
    */
   _requestFileTransfer(file) {
     if (this.state.roomTerminated || !this.state.p2p) return
-    if (file.size > FILE_SIZE_LIMIT) {
-      this.showError("Files must be under 24 MB.")
+    if (file.size > this.state.fileSizeLimit) {
+      this.showError(`Files must be under ${this._fileSizeLimitLabel()}.`)
       return
     }
     // Store the file and ask the server gate
@@ -493,6 +495,7 @@ export default class extends Controller {
       (name, percent) => this.updateFileProgress(name, percent),
       (msg) => this.showError(msg)
     )
+    this.sender.setFileSizeLimit(this.state.fileSizeLimit)
 
     this.receiver = new FileTransferReceiver(
       decryptFn,
@@ -579,6 +582,11 @@ export default class extends Controller {
     if (bytes < 1024)          return `${bytes} B`
     if (bytes < 1_048_576)     return `${(bytes / 1024).toFixed(1)} KB`
     return `${(bytes / 1_048_576).toFixed(1)} MB`
+  }
+
+  _fileSizeLimitLabel() {
+    const mebibytes = this.state.fileSizeLimit / (1024 * 1024)
+    return Number.isInteger(mebibytes) ? `${mebibytes} MB` : `${mebibytes.toFixed(1)} MB`
   }
 
   // ── Utilities ─────────────────────────────────────────────────────────────

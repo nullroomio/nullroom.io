@@ -96,6 +96,16 @@ To allow peers to rejoin (room stays active until TTL expires), edit [`config/in
 DESTROY_ROOM_ON_PEER_LEAVE = false  # Allow rejoin via browser history
 ```
 
+### P2P file transfer size limit
+
+The file transfer gate is configurable via environment variable (bytes):
+
+```bash
+NULLROOM_FILE_TRANSFER_SIZE_LIMIT_BYTES=16777216
+```
+
+Default is `16 MiB` (`16777216` bytes). The same limit is enforced server-side and reflected client-side in the room UI.
+
 ## Key routes
 
 - `GET /` → room landing page
