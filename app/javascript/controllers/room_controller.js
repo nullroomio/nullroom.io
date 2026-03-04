@@ -27,7 +27,8 @@ export default class extends Controller {
 
   static values = {
     roomId: String,
-    turnServers: Array
+    turnServers: Array,
+    roomTtlSeconds: Number
   }
 
   // Initialize controller state and kick off room setup.
@@ -394,7 +395,8 @@ export default class extends Controller {
   // Start the room countdown timer and disable input on expiry.
   startTimer() {
     const startTime = Date.now()
-    const duration = 30 * 60 * 1000 // 30 minutes in ms
+    const ttlSeconds = this.roomTtlSecondsValue > 0 ? this.roomTtlSecondsValue : (15 * 60)
+    const duration = ttlSeconds * 1000
 
     this.state.timerInterval = setInterval(() => {
       const elapsed = Date.now() - startTime

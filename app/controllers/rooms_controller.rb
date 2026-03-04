@@ -10,11 +10,11 @@ class RoomsController < ApplicationController
     # Generate unique room UUID
     room_id = SecureRandom.uuid
 
-    # Store room in Redis with 30-minute TTL
-    REDIS.setex("room:#{room_id}", 30.minutes.to_i, "active")
+    # Store room in Redis with configured TTL
+    REDIS.setex("room:#{room_id}", Nullroom::Config::ROOM_TTL_SECONDS, "active")
 
     # Initialize room counter (nobody joined yet)
-    REDIS.setex("room:#{room_id}:count", 31.minutes.to_i, "0")
+    REDIS.setex("room:#{room_id}:count", Nullroom::Config::ROOM_COUNT_TTL_SECONDS, "0")
 
     # Fetch ephemeral TURN credentials from Cloudflare
     begin
@@ -35,6 +35,7 @@ class RoomsController < ApplicationController
 
   def show
     @room_id = params[:id]
+    @room_ttl_seconds = Nullroom::Config::ROOM_TTL_SECONDS
 
     # Verify room exists in Redis
     unless REDIS.exists?("room:#{@room_id}")

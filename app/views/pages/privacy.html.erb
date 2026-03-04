@@ -60,7 +60,7 @@
           <dl class="space-y-2">
             <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
               <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">Room UUIDs</dt>
-              <dd class="text-sm text-secure-gray mt-1 sm:mt-0">Stored in volatile memory (Redis) and purged after 30 minutes.</dd>
+              <dd class="text-sm text-secure-gray mt-1 sm:mt-0">Stored in volatile memory (Redis) and purged after 15 minutes.</dd>
             </div>
             <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
               <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">Signaling Metadata</dt>
@@ -165,7 +165,7 @@
 
         <details class="glass px-5 py-4 cursor-pointer group">
           <summary class="text-sm font-semibold text-trace-white group-hover:text-status-blue transition-colors list-none">How long are rooms available?</summary>
-          <p class="text-sm text-secure-gray mt-3 leading-relaxed">Rooms expire after 30 minutes. Our Redis-backed self-destruct timer permanently purges all signaling data from volatile memory once the room expires.</p>
+          <p class="text-sm text-secure-gray mt-3 leading-relaxed">Rooms expire after 15 minutes. Our Redis-backed self-destruct timer permanently purges all signaling data from volatile memory once the room expires.</p>
         </details>
 
         <details class="glass px-5 py-4 cursor-pointer group">

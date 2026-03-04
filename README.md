@@ -13,7 +13,7 @@ Two people share a link, establish a direct encrypted data channel, and exchange
 ## What this app is
 
 - **No accounts, no identities**: users create/join rooms by URL only.
-- **Ephemeral rooms**: room state is stored in Redis with a TTL (30 minutes by default).
+- **Ephemeral rooms**: room state is stored in Redis with a TTL (15 minutes by default).
 - **2-person rooms**: the signaling channel enforces max capacity.
 - **Client-side encryption**: AES-GCM keys are generated in-browser and stored in the URL fragment (`#...`), which is not sent to the server.
 - **P2P messaging**: messages are sent over WebRTC DataChannels after signaling.
