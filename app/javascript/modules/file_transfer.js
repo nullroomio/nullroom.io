@@ -12,7 +12,12 @@ const CHUNK_SIZE   = 65_536       // 64 KB per spec
 const MAX_BUFFER   = 16_777_216   // 16 MB — pause sending above this (backpressure)
 
 /** Maximum file size allowed in the Beta phase. Mirrors the server-side gate. */
-export const FILE_SIZE_LIMIT = 25_165_824  // 24 MiB (24 × 1024 × 1024)
+export const FILE_SIZE_LIMIT = 16_777_216  // 16 MiB (16 × 1024 × 1024)
+
+function fileSizeLimitLabel(bytes) {
+  const mebibytes = bytes / (1024 * 1024)
+  return Number.isInteger(mebibytes) ? `${mebibytes} MB` : `${mebibytes.toFixed(1)} MB`
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FileTransferSender
@@ -37,7 +42,15 @@ export class FileTransferSender {
     this.encryptFn = encryptFn
     this.onProgress = onProgress
     this.onError    = onError
+    this.fileSizeLimit = FILE_SIZE_LIMIT
     this._sending   = false
+  }
+
+  setFileSizeLimit(bytes) {
+    const parsed = Number(bytes)
+    if (Number.isFinite(parsed) && parsed > 0) {
+      this.fileSizeLimit = parsed
+    }
   }
 
   /**
@@ -52,8 +65,8 @@ export class FileTransferSender {
     }
 
     // Client-side size guard (mirrors server gate — instant UX feedback)
-    if (file.size > FILE_SIZE_LIMIT) {
-      this.onError("Files must be under 24 MB.")
+    if (file.size > this.fileSizeLimit) {
+      this.onError(`Files must be under ${fileSizeLimitLabel(this.fileSizeLimit)}.`)
       return
     }
 

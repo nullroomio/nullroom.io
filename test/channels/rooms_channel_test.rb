@@ -242,7 +242,7 @@ class RoomsChannelTest < ActionCable::Channel::TestCase
 
       response = transmissions.last.deep_symbolize_keys
       assert_equal "file_transfer_error", response[:type]
-      assert_includes response[:error], "24 MB"
+      assert_includes response[:error], "16 MB"
     end
   end
 
