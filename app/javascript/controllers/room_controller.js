@@ -2,6 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 import PeerConnection from "modules/peer_connection"
 import { importKey, encrypt, decrypt, encryptBuffer, decryptBuffer } from "modules/encryption"
 import { FileTransferSender, FileTransferReceiver, FILE_SIZE_LIMIT } from "modules/file_transfer"
+import { devLog } from "modules/dev_logger"
 
 // Manages room lifecycle, signaling, and P2P encrypted messaging UI.
 export default class extends Controller {
@@ -43,6 +44,7 @@ export default class extends Controller {
       channel: null,
       timer: null,
       connectionId: null, // Store our connection ID
+      objectUrls: new Set(),
       // File transfer
       fileSharing: false,
       pendingFile: null,
@@ -78,9 +80,6 @@ export default class extends Controller {
         ? this.turnServersValue
         : []
 
-      // Log ICE servers for debugging
-      console.log("[Room] ICE servers configured:", this.iceServers)
-
       // Subscribe to ActionCable RoomChannel FIRST
       this.subscribeToChannel()
 
@@ -94,8 +93,7 @@ export default class extends Controller {
 
   // Create the WebRTC peer wrapper and bind signaling/data handlers.
   initializePeer(isInitiator) {
-    console.log("[Room] Initializing peer connection")
-    console.log("[Room] Creating peer, initiator:", isInitiator)
+    devLog("[Room] Initializing peer connection")
 
     // Store whether we're initiator
     this.isInitiator = isInitiator
@@ -108,7 +106,6 @@ export default class extends Controller {
 
     // Handle peer signal event (emit offers, answers, ICE candidates)
     this.state.peer.on("signal", (data) => {
-      console.log("[Room] Sending signal:", data.type)
       if (this.channel) {
         this.channel.perform("send_signal", { data: data })
       } else {
@@ -155,39 +152,36 @@ export default class extends Controller {
 
   // Subscribe to ActionCable signaling channel and route messages to peer.
   subscribeToChannel() {
-    console.log("[Room] Subscribing to channel, room_id:", this.roomIdValue)
     this.channel = window.cable.subscriptions.create(
       { channel: "RoomsChannel", room_id: this.roomIdValue },
       {
         connected: () => {
-          console.log("[Room] Connected to RoomChannel - waiting for init message")
+          devLog("[Room] Connected to RoomChannel")
         },
         disconnected: () => {
-          console.log("[Room] Disconnected from RoomChannel")
+          devLog("[Room] Disconnected from RoomChannel")
         },
         rejected: () => {
           console.error("[Room] Subscription rejected - room may be full")
           this.showError("Room is full or unavailable")
         },
         received: (data) => {
-          console.log("[Room] Received data:", data)
-
           if (data.type === "init") {
             // Store our connection ID and initialize peer
             this.state.connectionId = data.connection_id
             this.state.fileSharing  = data.file_sharing === true
             this.state.fileSizeLimit = Number(data.file_size_limit) > 0 ? Number(data.file_size_limit) : FILE_SIZE_LIMIT
-            console.log("[Room] Got init message, initiator:", data.initiator, "connection_id:", data.connection_id, "file_sharing:", this.state.fileSharing)
+            devLog("[Room] Received init event")
             this.initializePeer(data.initiator)
           } else if (data.type === "peer_ready") {
             // Second peer is ready, initiator can now create offer
             if (this.isInitiator && this.state.peer) {
-              console.log("[Room] Peer ready signal received, creating offer")
+              devLog("[Room] Peer ready")
               this.state.peer.createOffer()
             }
           } else if (data.type === "peer_left") {
             // Peer left the room
-            console.log("[Room] Peer left the room")
+            devLog("[Room] Peer left")
             if (data.connection_id === this.state.connectionId) {
               return
             }
@@ -212,11 +206,10 @@ export default class extends Controller {
           } else if (data.type === "signal") {
             // Ignore signals from ourselves
             if (data.connection_id === this.state.connectionId) {
-              console.log("[Room] Ignoring own signal:", data.data.type)
               return
             }
 
-            console.log("[Room] Processing signal from peer:", data.data.type)
+            devLog("[Room] Processing peer signal", data.data?.type || "unknown")
             // Relay signal to PeerConnection
             try {
               if (this.state.peer) {
@@ -239,7 +232,7 @@ export default class extends Controller {
     if (event.type === "keydown") event.preventDefault()
 
     const input = this.messageInputTarget
-    const text = input.value.trim()
+    const text = this.normalizeChatText(input.value)
 
     if (!text || this.state.roomTerminated || this.state.signaling) return
 
@@ -266,9 +259,10 @@ export default class extends Controller {
     try {
       // Decrypt message
       const plaintext = await decrypt(encryptedString.toString(), this.state.encryptionKey)
+      const safeText = this.normalizeChatText(plaintext)
 
       // Display in UI
-      this.displayMessage(plaintext, false)
+      this.displayMessage(safeText, false)
     } catch (error) {
       console.error("Error decrypting message:", error)
       this.showError("Failed to decrypt message")
@@ -279,6 +273,8 @@ export default class extends Controller {
   displayMessage(text, isMine) {
     this.clearWaitingPlaceholder()
 
+    const safeText = this.normalizeChatText(text)
+
     const timestamp = new Date().toLocaleTimeString()
     const timestampClass = isMine ? "text-green-400" : "text-blue-400"
     const messageEl = document.createElement("div")
@@ -288,10 +284,16 @@ export default class extends Controller {
         : "bg-blue-900 bg-opacity-20 text-blue-300 mr-8"
     }`
 
-    messageEl.innerHTML = `
-      <div class="${timestampClass} text-xs">${timestamp}</div>
-      <div class="mt-1 break-words">${this.escapeHtml(text)}</div>
-    `
+    const timestampEl = document.createElement("div")
+    timestampEl.className = `${timestampClass} text-xs`
+    timestampEl.textContent = timestamp
+
+    const textEl = document.createElement("div")
+    textEl.className = "mt-1 break-words"
+    textEl.textContent = safeText
+
+    messageEl.appendChild(timestampEl)
+    messageEl.appendChild(textEl)
 
     this.messagesContainerTarget.appendChild(messageEl)
 
@@ -312,7 +314,7 @@ export default class extends Controller {
     this.state.pendingFile    = null
 
     // Clear messages from DOM immediately
-    this.messagesContainerTarget.innerHTML = ""
+    this.messagesContainerTarget.textContent = ""
 
     // Update status
     this.updateStatus(false, "🔒 Room Terminated — One participant left")
@@ -327,6 +329,7 @@ export default class extends Controller {
     }
     this.sender   = null
     this.receiver = null
+    this.revokeObjectUrls()
 
     // Show termination modal
     this.terminatedModalTarget.classList.remove("hidden")
@@ -346,6 +349,7 @@ export default class extends Controller {
     if (this.state.peer) {
       this.state.peer.destroy()
     }
+    this.revokeObjectUrls()
 
     // Removing the subscription triggers unsubscribed on the server,
     // which broadcasts peer_left to the other participant.
@@ -539,40 +543,73 @@ export default class extends Controller {
   appendFileDownload({ name, url, size, isSent = false }) {
     this.clearWaitingPlaceholder()
 
-    const timestamp    = new Date().toLocaleTimeString()
-    const paperclipSVG = `<svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none"
-         stroke="currentColor" stroke-width="1.5"
-         stroke-linecap="round" stroke-linejoin="round">
-      <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
-    </svg>`
+    const timestamp = new Date().toLocaleTimeString()
+    const safeName = this.normalizeFileName(name)
+    const safeSize = this.normalizeFileSize(size)
 
     const el = document.createElement("div")
+
+    const timestampEl = document.createElement("div")
 
     if (isSent) {
       // Outgoing: matches sent text message style — green, pushed to the right
       el.className = "px-3 py-2 text-xs font-mono bg-green-900 bg-opacity-20 text-green-300 ml-8"
-      el.innerHTML = `
-        <div class="text-green-400 text-xs">${timestamp}</div>
-        <div class="mt-1 flex items-center gap-2 break-all">
-          ${paperclipSVG}
-          ${this.escapeHtml(name)} <span class="text-white/40">(${this.formatFileSize(size)})</span>
-          <span class="text-green-500/60 text-xs ml-1">✓ sent</span>
-        </div>
-      `
+      timestampEl.className = "text-green-400 text-xs"
+
+      const rowEl = document.createElement("div")
+      rowEl.className = "mt-1 flex items-center gap-2 break-all"
+
+      rowEl.appendChild(this.createPaperclipIcon())
+
+      const fileNameEl = document.createElement("span")
+      fileNameEl.textContent = safeName
+
+      const sizeEl = document.createElement("span")
+      sizeEl.className = "text-white/40"
+      sizeEl.textContent = `(${this.formatFileSize(safeSize)})`
+
+      const sentEl = document.createElement("span")
+      sentEl.className = "text-green-500/60 text-xs ml-1"
+      sentEl.textContent = "✓ sent"
+
+      rowEl.appendChild(fileNameEl)
+      rowEl.appendChild(sizeEl)
+      rowEl.appendChild(sentEl)
+
+      timestampEl.textContent = timestamp
+      el.appendChild(timestampEl)
+      el.appendChild(rowEl)
     } else {
       // Incoming: blue bubble with a clickable download anchor
       el.className = "px-3 py-2 text-xs font-mono bg-blue-900 bg-opacity-20 text-blue-300 mr-8"
-      el.innerHTML = `
-        <div class="text-blue-400 text-xs">${timestamp}</div>
-        <a
-          href="${url}"
-          download="${this.escapeHtml(name)}"
-          class="mt-1 flex items-center gap-2 underline hover:text-blue-200 break-all"
-        >
-          ${paperclipSVG}
-          ${this.escapeHtml(name)} <span class="text-white/40">(${this.formatFileSize(size)})</span>
-        </a>
-      `
+      timestampEl.className = "text-blue-400 text-xs"
+
+      const linkEl = document.createElement("a")
+      linkEl.className = "mt-1 flex items-center gap-2 underline hover:text-blue-200 break-all"
+      linkEl.download = safeName
+      if (typeof url === "string" && url.startsWith("blob:")) {
+        linkEl.href = url
+        this.state.objectUrls.add(url)
+      } else {
+        linkEl.href = "#"
+        linkEl.addEventListener("click", (event) => event.preventDefault())
+      }
+
+      linkEl.appendChild(this.createPaperclipIcon())
+
+      const fileNameEl = document.createElement("span")
+      fileNameEl.textContent = safeName
+
+      const sizeEl = document.createElement("span")
+      sizeEl.className = "text-white/40"
+      sizeEl.textContent = `(${this.formatFileSize(safeSize)})`
+
+      linkEl.appendChild(fileNameEl)
+      linkEl.appendChild(sizeEl)
+
+      timestampEl.textContent = timestamp
+      el.appendChild(timestampEl)
+      el.appendChild(linkEl)
     }
 
     this.messagesContainerTarget.appendChild(el)
@@ -593,11 +630,48 @@ export default class extends Controller {
 
   // ── Utilities ─────────────────────────────────────────────────────────────
 
-  // Escape user-provided text before injecting into the DOM.
-  escapeHtml(text) {
-    const div = document.createElement("div")
-    div.textContent = text
-    return div.innerHTML
+  normalizeChatText(value) {
+    return String(value ?? "")
+      .normalize("NFKC")
+      .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "")
+      .slice(0, 5000)
+      .trim()
+  }
+
+  normalizeFileName(value) {
+    const fallback = "download"
+    const normalized = String(value ?? "")
+      .normalize("NFKC")
+      .replace(/[\u0000-\u001F\u007F]/g, "")
+      .replace(/[\\/:*?"|]/g, "_")
+      .replace(/[<>]/g, "_")
+      .trim()
+
+    return (normalized || fallback).slice(0, 255)
+  }
+
+  normalizeFileSize(value) {
+    const parsed = Number(value)
+    if (!Number.isFinite(parsed) || parsed < 0) return 0
+    return Math.floor(parsed)
+  }
+
+  createPaperclipIcon() {
+    const ns = "http://www.w3.org/2000/svg"
+    const svg = document.createElementNS(ns, "svg")
+    svg.setAttribute("class", "w-4 h-4 shrink-0")
+    svg.setAttribute("viewBox", "0 0 24 24")
+    svg.setAttribute("fill", "none")
+    svg.setAttribute("stroke", "currentColor")
+    svg.setAttribute("stroke-width", "1.5")
+    svg.setAttribute("stroke-linecap", "round")
+    svg.setAttribute("stroke-linejoin", "round")
+
+    const path = document.createElementNS(ns, "path")
+    path.setAttribute("d", "M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48")
+    svg.appendChild(path)
+
+    return svg
   }
 
   // Cleanup timers, peer connection, and channel subscription.
@@ -611,8 +685,17 @@ export default class extends Controller {
       this.state.peer.destroy()
     }
 
+    this.revokeObjectUrls()
+
     if (this.channel) {
       window.cable.subscriptions.remove(this.channel)
     }
+  }
+
+  revokeObjectUrls() {
+    for (const url of this.state.objectUrls) {
+      URL.revokeObjectURL(url)
+    }
+    this.state.objectUrls.clear()
   }
 }

@@ -3,6 +3,8 @@ require "test_helper"
 class RoomsChannelTest < ActionCable::Channel::TestCase
   tests RoomsChannel
 
+  XSS_POLYGLOT_PAYLOAD = "javascript:/*--></title></style></textarea></script></xmp><svg/onload=alert('xss')>"
+
   class InMemoryRedis
     def initialize(initial_values = {})
       @values = initial_values.transform_values(&:to_s)
@@ -108,6 +110,31 @@ class RoomsChannelTest < ActionCable::Channel::TestCase
         { type: "signal", data: nil, connection_id: connection_id }
       ) do
         perform :send_signal, {}
+      end
+    end
+  end
+
+  test "relays a polyglot signaling payload without crashing" do
+    room_id = "room-polyglot-signal"
+    redis = InMemoryRedis.new(
+      "room:#{room_id}" => "active",
+      "room:#{room_id}:count" => "0"
+    )
+
+    with_stubbed_redis(redis) do
+      subscribe room_id: room_id
+
+      assert subscription.confirmed?
+
+      init_payload = transmissions.last.deep_symbolize_keys
+      connection_id = init_payload.fetch(:connection_id)
+      signal_data = { "type" => "offer", "sdp" => XSS_POLYGLOT_PAYLOAD }
+
+      assert_broadcast_on(
+        "rooms:#{room_id}",
+        { type: "signal", data: signal_data, connection_id: connection_id }
+      ) do
+        perform :send_signal, { "data" => signal_data }
       end
     end
   end
@@ -227,6 +254,29 @@ class RoomsChannelTest < ActionCable::Channel::TestCase
     end
   end
 
+  test "initiate_file_transfer authorises polyglot file metadata within limit" do
+    room_id = "room-polyglot-file-ok"
+    redis = InMemoryRedis.new(
+      "room:#{room_id}" => "active",
+      "room:#{room_id}:count" => "0"
+    )
+
+    with_stubbed_redis(redis) do
+      subscribe room_id: room_id
+      assert subscription.confirmed?
+
+      perform :initiate_file_transfer, {
+        "metadata" => {
+          "file_name" => XSS_POLYGLOT_PAYLOAD,
+          "file_size" => 1024
+        }
+      }
+
+      response = transmissions.last.deep_symbolize_keys
+      assert_equal "file_transfer_authorized", response[:type]
+    end
+  end
+
   test "initiate_file_transfer rejects and transmits error for files exceeding the 25 MB limit" do
     room_id = "room-file-too-large"
     redis = InMemoryRedis.new(
@@ -243,6 +293,31 @@ class RoomsChannelTest < ActionCable::Channel::TestCase
       response = transmissions.last.deep_symbolize_keys
       assert_equal "file_transfer_error", response[:type]
       assert_includes response[:error], "16 MB"
+    end
+  end
+
+  test "initiate_file_transfer error does not reflect polyglot filename" do
+    room_id = "room-polyglot-file-too-large"
+    redis = InMemoryRedis.new(
+      "room:#{room_id}" => "active",
+      "room:#{room_id}:count" => "0"
+    )
+
+    with_stubbed_redis(redis) do
+      subscribe room_id: room_id
+      assert subscription.confirmed?
+
+      perform :initiate_file_transfer, {
+        "metadata" => {
+          "file_name" => XSS_POLYGLOT_PAYLOAD,
+          "file_size" => Nullroom::Config::FILE_TRANSFER_SIZE_LIMIT_BYTES + 1
+        }
+      }
+
+      response = transmissions.last.deep_symbolize_keys
+      assert_equal "file_transfer_error", response[:type]
+      assert_includes response[:error], "Beta limit exceeded"
+      refute_includes response[:error], XSS_POLYGLOT_PAYLOAD
     end
   end
 
