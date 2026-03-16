@@ -14,9 +14,47 @@ const MAX_BUFFER   = 16_777_216   // 16 MB — pause sending above this (backpre
 /** Maximum file size allowed in the Beta phase. Mirrors the server-side gate. */
 export const FILE_SIZE_LIMIT = 16_777_216  // 16 MiB (16 × 1024 × 1024)
 
+const MAX_FILE_NAME_LENGTH = 255
+const MAX_TOTAL_CHUNKS = Math.ceil(FILE_SIZE_LIMIT / CHUNK_SIZE)
+const SAFE_MIME_FALLBACK = "application/octet-stream"
+const DISPLAYABLE_MIME_TYPES = new Set([
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+  "application/pdf",
+  "text/plain"
+])
+
 function fileSizeLimitLabel(bytes) {
   const mebibytes = bytes / (1024 * 1024)
   return Number.isInteger(mebibytes) ? `${mebibytes} MB` : `${mebibytes.toFixed(1)} MB`
+}
+
+function normalizeFileName(value) {
+  const normalized = String(value ?? "")
+    .normalize("NFKC")
+    .replace(/[\u0000-\u001F\u007F]/g, "")
+    .replace(/[\\/:*?"<>|]/g, "_")
+    .trim()
+
+  return (normalized || "download").slice(0, MAX_FILE_NAME_LENGTH)
+}
+
+function normalizeFileSize(value) {
+  const parsed = Number(value)
+  if (!Number.isFinite(parsed) || parsed < 0 || parsed > FILE_SIZE_LIMIT) return 0
+  return Math.floor(parsed)
+}
+
+function normalizeMimeType(value) {
+  const normalized = String(value ?? "").trim().toLowerCase()
+  return DISPLAYABLE_MIME_TYPES.has(normalized) ? normalized : SAFE_MIME_FALLBACK
+}
+
+function normalizeTotalChunks(value) {
+  const parsed = Number(value)
+  if (!Number.isInteger(parsed) || parsed <= 0 || parsed > MAX_TOTAL_CHUNKS) return 0
+  return parsed
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -195,9 +233,20 @@ export class FileTransferReceiver {
 
       if (msg.type === "file-start") {
         this._reset()
-        this._meta   = msg
-        this._chunks = new Array(msg.totalChunks) // pre-allocate for ordered insertion
-        console.log("[FileTransfer] Receiving:", msg.name, "-", msg.size, "bytes,", msg.totalChunks, "chunks")
+        const totalChunks = normalizeTotalChunks(msg.totalChunks)
+        if (!totalChunks) {
+          this._reset()
+          return
+        }
+
+        this._meta = {
+          transferId: String(msg.transferId || ""),
+          name: normalizeFileName(msg.name),
+          size: normalizeFileSize(msg.size),
+          totalChunks,
+          mimeType: normalizeMimeType(msg.mimeType)
+        }
+        this._chunks = new Array(totalChunks) // pre-allocate for ordered insertion
       } else if (msg.type === "file-end") {
         this._endReceived = true
         this._tryAssemble()
@@ -208,6 +257,7 @@ export class FileTransferReceiver {
 
       // Capture this chunk's position before any await
       const myIndex = this._nextIndex++
+      if (myIndex >= this._meta.totalChunks) return
       this._pendingDecrypts++
 
       try {
@@ -247,9 +297,9 @@ export class FileTransferReceiver {
     const url  = URL.createObjectURL(blob)
 
     this.onComplete({
-      name:     this._meta.name,
+      name: this._meta.name,
       url,
-      size:     this._meta.size,
+      size: blob.size,
       mimeType: this._meta.mimeType
     })
 

@@ -3,6 +3,8 @@
  * Replaces simple-peer with vanilla WebRTC API
  */
 
+import { devInfo, devLog } from "modules/dev_logger"
+
 export class PeerConnection {
   constructor(options = {}) {
     this.initiator = options.initiator || false
@@ -20,7 +22,7 @@ export class PeerConnection {
   }
 
   _init() {
-    console.log("[PeerConnection] Initializing, initiator:", this.initiator)
+    devLog("[PeerConnection] Initializing", { initiator: this.initiator })
 
     // Create RTCPeerConnection
     this.pc = new RTCPeerConnection({
@@ -30,7 +32,6 @@ export class PeerConnection {
     // Handle ICE candidates
     this.pc.onicecandidate = (event) => {
       if (event.candidate && this.trickleIce) {
-        console.log("[PeerConnection] Emitting ICE candidate")
         this._emit("signal", {
           type: "candidate",
           candidate: event.candidate
@@ -40,7 +41,7 @@ export class PeerConnection {
 
     // Handle connection state changes
     this.pc.onconnectionstatechange = () => {
-      console.log("[PeerConnection] Connection state:", this.pc.connectionState)
+      devInfo("[PeerConnection] Connection state", this.pc.connectionState)
       if (this.pc.connectionState === "connected") {
         this._connected = true
         this._emit("connect")
@@ -107,7 +108,6 @@ export class PeerConnection {
     this.fileChannel.binaryType = "arraybuffer"
 
     this.fileChannel.onopen = () => {
-      console.log("[PeerConnection] File channel open")
       this._emit("file-channel-ready")
     }
 
@@ -121,12 +121,11 @@ export class PeerConnection {
   }
 
   async _createOffer() {
-    console.log("[PeerConnection] Creating offer")
+    devLog("[PeerConnection] Creating offer")
     try {
       const offer = await this.pc.createOffer()
       await this.pc.setLocalDescription(offer)
 
-      console.log("[PeerConnection] Emitting offer")
       this._emit("signal", {
         type: "offer",
         sdp: this.pc.localDescription
@@ -138,12 +137,11 @@ export class PeerConnection {
   }
 
   async _createAnswer() {
-    console.log("[PeerConnection] Creating answer")
+    devLog("[PeerConnection] Creating answer")
     try {
       const answer = await this.pc.createAnswer()
       await this.pc.setLocalDescription(answer)
 
-      console.log("[PeerConnection] Emitting answer")
       this._emit("signal", {
         type: "answer",
         sdp: this.pc.localDescription
@@ -155,20 +153,17 @@ export class PeerConnection {
   }
 
   async signal(data) {
-    console.log("[PeerConnection] Received signal:", data.type)
+    devLog("[PeerConnection] Processing signal", data.type)
     try {
       if (data.type === "offer") {
-        console.log("[PeerConnection] Setting remote description (offer)")
         await this.pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
         await this._flushPendingCandidates()
         await this._createAnswer()
       } else if (data.type === "answer") {
-        console.log("[PeerConnection] Setting remote description (answer)")
         await this.pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
         await this._flushPendingCandidates()
       } else if (data.type === "candidate" && data.candidate) {
         if (this.pc.remoteDescription && this.pc.remoteDescription.type) {
-          console.log("[PeerConnection] Adding ICE candidate")
           await this.pc.addIceCandidate(new RTCIceCandidate(data.candidate))
         } else {
           this._pendingCandidates.push(data.candidate)
