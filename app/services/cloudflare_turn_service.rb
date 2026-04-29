@@ -40,7 +40,7 @@ class CloudflareTurnService
       # Cloudflare returns { iceServers: [...] }
       # Filter to avoid browser warning about too many STUN/TURN servers
       ice_servers = data["iceServers"]
-      
+
       # Keep only primary ports to reduce server count
       # Remove alternate ports (53, 80) which are often blocked anyway
       optimized_servers = ice_servers.map do |server|
@@ -53,7 +53,7 @@ class CloudflareTurnService
           server
         end
       end.compact
-      
+
       optimized_servers
     rescue StandardError => e
       Rails.logger.error("CloudflareTurnService error: #{e.message}")

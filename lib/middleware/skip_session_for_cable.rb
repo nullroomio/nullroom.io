@@ -37,4 +37,3 @@ module Middleware
     end
   end
 end
-
