@@ -92,3 +92,13 @@ accessories:
     port: "127.0.0.1:6379:6379"
     directories:
       - data:/data
+
+  # Tor SOCKS proxy for outbound anonymized traffic.
+  tor:
+    image: ghcr.io/peterdavehello/tor-socks-proxy:latest
+    host: <%= ENV['KAMAL_WEB_IP'] %>
+    port: "127.0.0.1:9150:9150"
+    options:
+      memory: 128m
+      memory-swap: 128m
+      cpus: "0.50"
