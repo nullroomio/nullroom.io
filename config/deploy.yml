@@ -53,6 +53,8 @@ env:
     RAILS_SERVE_STATIC_FILES: true
     # Disable Thruster request logging for zero-trace privacy.
     LOG_REQUESTS: false
+    # Donation minimum amount in piconero (0.004 XMR).
+    NULLROOM_DONATION_AMOUNT_PICONERO: 4000000000
   secret:
     - RAILS_MASTER_KEY
     - REDIS_URL

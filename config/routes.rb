@@ -14,6 +14,14 @@ Rails.application.routes.draw do
   # Room routes for nullroom P2P messaging
   resources :rooms, only: [ :index, :create, :show ]
 
+  # Anonymous blind token donation receipt flows (Monero + blind signatures)
+  post "blind_tokens/session" => "blind_tokens#create_payment_session"
+  get "blind_tokens/status" => "blind_tokens#status"
+  post "blind_tokens/sign" => "blind_tokens#sign"
+  post "blind_tokens/verify" => "blind_tokens#verify"
+  get "blind_tokens/public_key" => "blind_tokens#public_key"
+  get "blind_tokens/qr" => "blind_tokens#qr"
+
   # Static pages
   get "privacy" => "pages#privacy", as: :privacy_page
 
