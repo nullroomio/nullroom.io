@@ -60,6 +60,13 @@
         >
           <%= render "shared/icon", name: "clipboard", css: "w-4 h-4" %>
         </button>
+        <button
+          data-action="room#showQR"
+          aria-label="Show QR code"
+          class="shrink-0 p-2 rounded-lg bg-white/5 border border-white/8 text-secure-gray hover:text-trace-white hover:border-white/20 active:scale-95 transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-status-blue cursor-pointer"
+        >
+          <%= render "shared/icon", name: "qr-code", css: "w-4 h-4" %>
+        </button>
       </div>
     </div>
 
@@ -165,6 +172,26 @@
       <button
         data-action="room#closeRoom"
         class="w-full px-6 py-3 rounded-lg border border-red-800/60 text-red-400 text-sm font-sans font-semibold hover:bg-red-950/50 active:scale-95 transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500 cursor-pointer"
+      >
+        Close
+      </button>
+    </div>
+  </div>
+
+  <%# ── QR Code Modal (initially hidden) ──────────────────────────── %>
+  <div
+    data-room-target="qrModal"
+    data-action="click->room#closeQR"
+    class="hidden fixed inset-0 bg-null-deep/80 backdrop-blur-sm flex items-center justify-center z-50 px-4"
+  >
+    <div class="glass w-full max-w-xs p-6 text-center space-y-4" data-action="click->room#stopPropagation">
+      <p class="text-xs font-mono text-secure-gray tracking-widest uppercase">Scan to Join</p>
+      <div class="flex items-center justify-center">
+        <canvas data-room-target="qrCanvas" class="rounded-lg"></canvas>
+      </div>
+      <button
+        data-action="room#closeQR"
+        class="w-full px-4 py-2 rounded-lg border border-white/10 text-secure-gray text-xs font-mono hover:text-trace-white hover:border-white/20 active:scale-95 transition-all cursor-pointer"
       >
         Close
       </button>

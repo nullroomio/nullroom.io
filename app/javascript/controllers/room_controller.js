@@ -23,7 +23,10 @@ export default class extends Controller {
     "fileInput",
     "fileProgress",
     "fileProgressBar",
-    "fileProgressLabel"
+    "fileProgressLabel",
+    // QR code
+    "qrModal",
+    "qrCanvas"
   ]
 
   static values = {
@@ -366,6 +369,30 @@ export default class extends Controller {
     window.location.href = "/"
   }
 
+  // Show a QR code of the full room URL (including #key fragment).
+  async showQR() {
+    const QrCreator = (await import("qr-creator")).default
+    QrCreator.render({
+      text: window.location.href,
+      radius: 0.4,
+      ecLevel: "M",
+      fill: "#22c55e",
+      background: "#0a0a0f",
+      size: 200
+    }, this.qrCanvasTarget)
+    this.qrModalTarget.classList.remove("hidden")
+  }
+
+  // Hide the QR code modal.
+  closeQR(event) {
+    this.qrModalTarget.classList.add("hidden")
+  }
+
+  // Prevent backdrop click from closing when clicking the modal card.
+  stopPropagation(event) {
+    event.stopPropagation()
+  }
+
   // Copy share link to clipboard with a fallback for older browsers.
   copyLink(event) {
     const link = this.shareLinkTarget.value
@@ -426,6 +453,8 @@ export default class extends Controller {
       this.state.signaling = false
       this.statusDotTarget.className = "w-3 h-3 rounded-full bg-green-500"
       this.statusDotTarget.classList.remove("animate-pulse")
+      // Auto-dismiss QR modal when P2P connects
+      if (this.hasQrModalTarget) this.qrModalTarget.classList.add("hidden")
     } else {
       this.statusDotTarget.className = "w-3 h-3 rounded-full bg-red-500"
     }
