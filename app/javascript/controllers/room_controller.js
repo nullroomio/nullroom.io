@@ -393,6 +393,13 @@ export default class extends Controller {
     event.stopPropagation()
   }
 
+  // Reveal the privacy-shrouded room link and select it.
+  revealLink(event) {
+    const input = event.currentTarget
+    input.classList.add("revealed")
+    input.select()
+  }
+
   // Copy share link to clipboard with a fallback for older browsers.
   copyLink(event) {
     const link = this.shareLinkTarget.value

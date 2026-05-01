@@ -51,7 +51,7 @@
           value="<%= request.url %>"
           aria-label="Room link"
           class="privacy-shroud flex-1 min-w-0 px-3 py-2 rounded-lg bg-white/5 border border-white/8 text-trace-white text-xs font-mono focus:outline-none focus:border-status-blue hover:border-white/20 transition-colors"
-          onclick="this.classList.add('revealed'); this.select();"
+          data-action="click->room#revealLink"
         />
         <button
           data-action="room#copyLink"
@@ -175,8 +175,7 @@
         <div class="h-1 bg-white/10 rounded-full overflow-hidden">
           <div
             data-room-target="fileProgressBar"
-            class="h-full bg-status-blue rounded-full transition-all duration-200"
-            style="width: 0%"
+            class="h-full w-0 bg-status-blue rounded-full transition-all duration-200"
           ></div>
         </div>
       </div>
