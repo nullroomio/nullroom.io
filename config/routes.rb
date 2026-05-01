@@ -14,6 +14,10 @@ Rails.application.routes.draw do
   # Room routes for nullroom P2P messaging
   resources :rooms, only: [ :index, :create, :show ]
 
+  # Zero-knowledge handshake (ephemeral code-based room sharing)
+  post "handshakes/:id", to: "handshakes#create"
+  get  "handshakes/:id", to: "handshakes#show"
+
   # Anonymous blind token donation receipt flows (Monero + blind signatures)
   post "blind_tokens/session" => "blind_tokens#create_payment_session"
   get "blind_tokens/status" => "blind_tokens#status"

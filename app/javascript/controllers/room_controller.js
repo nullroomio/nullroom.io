@@ -455,6 +455,8 @@ export default class extends Controller {
       this.statusDotTarget.classList.remove("animate-pulse")
       // Auto-dismiss QR modal when P2P connects
       if (this.hasQrModalTarget) this.qrModalTarget.classList.add("hidden")
+      // Auto-dismiss handshake phrase display when P2P connects
+      this.element.dispatchEvent(new CustomEvent("room:peer-connected", { bubbles: true }))
     } else {
       this.statusDotTarget.className = "w-3 h-3 rounded-full bg-red-500"
     }
