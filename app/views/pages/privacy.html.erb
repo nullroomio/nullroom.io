@@ -74,7 +74,11 @@
           <dl class="space-y-2">
             <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
               <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">E2EE</dt>
-              <dd class="text-sm text-secure-gray mt-1 sm:mt-0">End-to-end encryption powered by the browser's Web Crypto API (AES-GCM 256-bit).</dd>
+              <dd class="text-sm text-secure-gray mt-1 sm:mt-0">End-to-end encryption powered by the browser's Web Crypto API (AES-GCM 256-bit) with a post-quantum hybrid key exchange.</dd>
+            </div>
+            <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
+              <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">Post-Quantum</dt>
+              <dd class="text-sm text-secure-gray mt-1 sm:mt-0">ML-KEM-768 (NIST FIPS 203) key exchange runs automatically over the data channel. The quantum shared secret is fused with the classical URL key via HKDF-SHA-256, producing a hybrid session key resistant to "harvest now, decrypt later" attacks.</dd>
             </div>
             <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
               <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">Peer-to-Peer</dt>
@@ -82,7 +86,11 @@
             </div>
             <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
               <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">Client-Side Keys</dt>
-              <dd class="text-sm text-secure-gray mt-1 sm:mt-0">The encryption key lives in the URL fragment (<code class="font-mono text-xs text-status-blue">#</code>), which browsers never send to the server.</dd>
+              <dd class="text-sm text-secure-gray mt-1 sm:mt-0">The encryption key lives in the URL fragment (<code class="font-mono text-xs text-status-blue">#</code>), which browsers never send to the server. This classical key serves as one of two inputs to the hybrid derivation.</dd>
+            </div>
+            <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
+              <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">Mutual Confirmation</dt>
+              <dd class="text-sm text-secure-gray mt-1 sm:mt-0">Both peers verify role-specific HMAC confirmations before activating the hybrid key, preventing reflection and man-in-the-middle attacks on the key exchange.</dd>
             </div>
           </dl>
         </div>
@@ -154,13 +162,20 @@
           <summary class="text-sm font-semibold text-trace-white group-hover:text-status-blue transition-colors list-none">How does the security work?</summary>
           <ol class="mt-3 space-y-1 text-sm text-secure-gray list-decimal list-inside">
             <li><span class="text-trace-white font-medium">WebRTC (Peer-to-Peer):</span> Your device talks directly to your peer's device - messages bypass our servers.</li>
-            <li><span class="text-trace-white font-medium">Web Crypto API:</span> Before a message leaves your device, it is locked with a key only your peer possesses (E2EE).</li>
+            <li><span class="text-trace-white font-medium">Post-Quantum Key Exchange:</span> Once the direct connection opens, both peers perform an ML-KEM-768 key exchange to establish a quantum-resistant shared secret.</li>
+            <li><span class="text-trace-white font-medium">Hybrid Key Derivation:</span> The quantum secret is fused with the classical URL key via HKDF-SHA-256, producing a hybrid session key that is secure against both classical and quantum attacks.</li>
+            <li><span class="text-trace-white font-medium">Web Crypto API:</span> Every message is encrypted with the hybrid key using AES-GCM 256-bit before leaving your device (E2EE).</li>
           </ol>
         </details>
 
         <details class="glass px-5 py-4 cursor-pointer group">
           <summary class="text-sm font-semibold text-trace-white group-hover:text-status-blue transition-colors list-none">If you don't have the keys, who does?</summary>
-          <p class="text-sm text-secure-gray mt-3 leading-relaxed">Only you and your peer. The key is appended to the URL after the <code class="font-mono text-xs text-status-blue">#</code> symbol. Because of how browsers work, anything after <code class="font-mono text-xs text-status-blue">#</code> is never sent to the server.</p>
+          <p class="text-sm text-secure-gray mt-3 leading-relaxed">Only you and your peer. The initial key is appended to the URL after the <code class="font-mono text-xs text-status-blue">#</code> symbol (never sent to the server). Once connected, a second quantum-resistant secret is negotiated directly between your browsers and fused with the URL key to produce the final hybrid session key. Neither secret alone is sufficient - an attacker would need both.</p>
+        </details>
+
+        <details class="glass px-5 py-4 cursor-pointer group">
+          <summary class="text-sm font-semibold text-trace-white group-hover:text-status-blue transition-colors list-none">What is post-quantum encryption and why does it matter?</summary>
+          <p class="text-sm text-secure-gray mt-3 leading-relaxed">Future quantum computers could break today's key-exchange algorithms (like ECDH), allowing adversaries who record encrypted traffic now to decrypt it later. nullroom uses <span class="text-trace-white font-medium">ML-KEM-768</span> (NIST FIPS 203, Security Level 3) - a lattice-based key encapsulation mechanism designed to resist quantum attacks. By combining it with the classical key, your session is protected even if one layer is eventually compromised.</p>
         </details>
 
         <details class="glass px-5 py-4 cursor-pointer group">
