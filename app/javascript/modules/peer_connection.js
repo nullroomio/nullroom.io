@@ -43,8 +43,8 @@ export class PeerConnection {
     this.pc.onconnectionstatechange = () => {
       devInfo("[PeerConnection] Connection state", this.pc.connectionState)
       if (this.pc.connectionState === "connected") {
-        this._connected = true
-        this._emit("connect")
+        // Only re-emit connect if already confirmed (post PQ-upgrade)
+        if (this._connected) this._emit("connect")
       } else if (this.pc.connectionState === "failed" || this.pc.connectionState === "closed") {
         this._emit("close")
       }
@@ -87,8 +87,7 @@ export class PeerConnection {
 
   _setupDataChannel() {
     this.dataChannel.onopen = () => {
-      this._connected = true
-      this._emit("connect")
+      this._emit("datachannel-open")
     }
 
     this.dataChannel.onclose = () => {
@@ -184,6 +183,15 @@ export class PeerConnection {
     for (const candidate of queued) {
       await this.pc.addIceCandidate(new RTCIceCandidate(candidate))
     }
+  }
+
+  /**
+   * Mark the connection as fully ready (post PQ-upgrade).
+   * Emits the "connect" event that enables UI messaging.
+   */
+  confirmReady() {
+    this._connected = true
+    this._emit("connect")
   }
 
   send(data) {

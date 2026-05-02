@@ -1,6 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 import PeerConnection from "modules/peer_connection"
 import { importKey, encrypt, decrypt, encryptBuffer, decryptBuffer } from "modules/encryption"
+import { performPQUpgrade } from "modules/pq_upgrade"
 import { FileTransferSender, FileTransferReceiver, FILE_SIZE_LIMIT } from "modules/file_transfer"
 import { devLog } from "modules/dev_logger"
 
@@ -40,6 +41,7 @@ export default class extends Controller {
     this.state = {
       signaling: true,
       p2p: false,
+      upgrading: false,
       roomTerminated: false,
       messages: [],
       encryptionKey: null,
@@ -76,6 +78,9 @@ export default class extends Controller {
 
       // Import encryption key
       this.state.encryptionKey = await importKey(keyString)
+
+      // Preload ML-KEM library (runs in parallel with WebRTC negotiation)
+      this.mlkemReady = import("mlkem").then(m => { m.init(); return m })
 
       // Use provided ICE servers from data attribute (from Cloudflare)
       // These are fetched server-side and never include Google STUN
@@ -119,7 +124,7 @@ export default class extends Controller {
     // Handle peer connection established
     this.state.peer.on("connect", () => {
       if (this.state.p2p) return // guard against duplicate connect events
-      this.updateStatus(true, "🔒 Secure P2P")
+      this.updateStatus(true, "🔒 Secure P2P (Quantum-Safe)")
       this.clearWaitingPlaceholder()
       this.messageInputTarget.disabled = false
       this.sendButtonTarget.disabled = false
@@ -130,8 +135,17 @@ export default class extends Controller {
       }
     })
 
-    // Handle DataChannel open
+    // Handle DataChannel open — trigger PQ upgrade before enabling messaging
+    this.state.peer.on("datachannel-open", () => {
+      this.performQuantumUpgrade()
+    })
+
+    // Handle DataChannel messages — route to PQ handler during upgrade
     this.state.peer.on("data", (data) => {
+      if (this.state.upgrading && this.state.peer._pqHandler) {
+        this.state.peer._pqHandler(data.toString())
+        return
+      }
       this.handleIncomingMessage(data)
     })
 
@@ -151,6 +165,34 @@ export default class extends Controller {
       console.error("Peer error:", err)
       this.handlePeerClosed()
     })
+  }
+
+  // Perform the post-quantum key upgrade over the data channel.
+  async performQuantumUpgrade() {
+    this.state.upgrading = true
+    devLog("[Room] Starting post-quantum key upgrade")
+
+    try {
+      const hybridKey = await performPQUpgrade(
+        this.state.peer,
+        this.state.encryptionKey,
+        this.isInitiator,
+        this.mlkemReady
+      )
+
+      // Replace the classical key with the hybrid key
+      this.state.encryptionKey = hybridKey
+      this.state.upgrading = false
+
+      devLog("[Room] Post-quantum upgrade complete")
+
+      // Now signal the connection as fully ready (enables UI)
+      this.state.peer.confirmReady()
+    } catch (error) {
+      console.error("[Room] Post-quantum upgrade failed:", error)
+      this.state.upgrading = false
+      this.showError("Secure connection failed")
+    }
   }
 
   // Subscribe to ActionCable signaling channel and route messages to peer.

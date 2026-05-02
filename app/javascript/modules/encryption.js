@@ -193,3 +193,43 @@ export async function decryptBuffer(buffer, key) {
     throw error
   }
 }
+
+/**
+ * Derive a hybrid AES-GCM 256-bit key from a classical CryptoKey and a
+ * post-quantum shared secret using HKDF-SHA-256.
+ *
+ * @param {CryptoKey} classicalKey The original AES-GCM key from the URL fragment
+ * @param {Uint8Array} quantumSecret The 32-byte ML-KEM shared secret
+ * @returns {Promise<CryptoKey>} A new AES-GCM 256-bit hybrid key
+ */
+export async function deriveHybridKey(classicalKey, quantumSecret) {
+  // Export the classical key as raw bytes to use as HKDF salt
+  const classicalRaw = new Uint8Array(
+    await crypto.subtle.exportKey("raw", classicalKey)
+  )
+
+  // Import the quantum secret as HKDF key material (IKM)
+  const hkdfKey = await crypto.subtle.importKey(
+    "raw",
+    quantumSecret,
+    "HKDF",
+    false,
+    ["deriveKey"]
+  )
+
+  // Derive the hybrid key: HKDF(salt=KC, ikm=SQ, info="nullroom-hybrid-v1")
+  const hybridKey = await crypto.subtle.deriveKey(
+    {
+      name: "HKDF",
+      hash: "SHA-256",
+      salt: classicalRaw,
+      info: new TextEncoder().encode("nullroom-hybrid-v1")
+    },
+    hkdfKey,
+    { name: "AES-GCM", length: 256 },
+    true,
+    ["encrypt", "decrypt"]
+  )
+
+  return hybridKey
+}
