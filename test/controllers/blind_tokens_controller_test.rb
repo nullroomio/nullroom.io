@@ -3,6 +3,10 @@ require "test_helper"
 class BlindTokensControllerTest < ActionDispatch::IntegrationTest
   parallelize(workers: 1)
 
+  setup do
+    Rack::Attack.cache.store.clear
+  end
+
   test "create payment session returns expected payload" do
     with_stubbed_redis do
       service = FakeMoneroService.new(
