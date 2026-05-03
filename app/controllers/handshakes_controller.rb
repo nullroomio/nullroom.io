@@ -1,6 +1,4 @@
 class HandshakesController < ApplicationController
-  skip_before_action :verify_authenticity_token
-
   # POST /handshakes/:id
   # Stores an encrypted blob in Redis under the given identifier.
   def create

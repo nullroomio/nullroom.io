@@ -41,7 +41,10 @@ export default class extends Controller {
 
       const response = await fetch(`/handshakes/${identifier}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": this.csrfToken()
+        },
         body: JSON.stringify({ blob: encryptedBlob })
       })
 
@@ -134,5 +137,9 @@ export default class extends Controller {
     if (this.hasJoinErrorTarget) {
       this.joinErrorTarget.classList.add("hidden")
     }
+  }
+
+  csrfToken() {
+    return document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") || ""
   }
 }

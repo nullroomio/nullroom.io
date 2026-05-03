@@ -16,6 +16,40 @@ class HandshakesControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "create requires a csrf token when forgery protection is enabled" do
+    with_forgery_protection do
+      with_stubbed_redis do
+        identifier = "0" * 64
+
+        post "/handshakes/#{identifier}",
+          params: { blob: "dGVzdA==" },
+          as: :json
+
+        assert_response :unprocessable_entity
+      end
+    end
+  end
+
+  test "create accepts a valid csrf token when forgery protection is enabled" do
+    with_forgery_protection do
+      with_stubbed_redis do
+        identifier = "1" * 64
+
+        get "/"
+        token = response.body[/<meta name="csrf-token" content="([^"]+)"/, 1]
+
+        assert token.present?
+
+        post "/handshakes/#{identifier}",
+          params: { blob: "dGVzdA==" },
+          headers: { "X-CSRF-Token" => token },
+          as: :json
+
+        assert_response :created
+      end
+    end
+  end
+
   test "show returns blob and deletes it (one-time read)" do
     with_stubbed_redis do
       identifier = "b" * 64
@@ -120,6 +154,14 @@ class HandshakesControllerTest < ActionDispatch::IntegrationTest
   ensure
     Object.send(:remove_const, :REDIS)
     Object.const_set(:REDIS, original)
+  end
+
+  def with_forgery_protection
+    original = ActionController::Base.allow_forgery_protection
+    ActionController::Base.allow_forgery_protection = true
+    yield
+  ensure
+    ActionController::Base.allow_forgery_protection = original
   end
 
   class FakeRedis
