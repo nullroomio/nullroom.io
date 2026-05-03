@@ -27,5 +27,6 @@ module Nullroom
 
     # Skip session cookies for ActionCable requests to keep the WS handshake stateless.
     config.middleware.insert_before ActionDispatch::Session::CookieStore, Middleware::SkipSessionForCable
+    config.middleware.use Rack::Attack
   end
 end
