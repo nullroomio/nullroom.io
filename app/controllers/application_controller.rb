@@ -23,7 +23,7 @@ class ApplicationController < ActionController::Base
     end
 
     verifier = BlindTokenVerifier.new
-    unless verifier.valid?(message_hex: message_hex, signature_hex: signature_hex)
+    unless verifier.consume!(message_hex: message_hex, signature_hex: signature_hex)
       render json: { error: "invalid_blind_token" }, status: :unauthorized
       return
     end
