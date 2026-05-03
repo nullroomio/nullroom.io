@@ -320,7 +320,7 @@ export default class extends Controller {
 
     const safeText = this.normalizeChatText(text)
 
-    const timestamp = new Date().toLocaleTimeString()
+    const timestamp = this.formatMessageTimestamp()
     const timestampClass = isMine ? "text-green-400" : "text-blue-400"
     const messageEl = document.createElement("div")
     messageEl.className = `px-3 py-2 text-xs font-mono ${
@@ -350,6 +350,14 @@ export default class extends Controller {
     if (this.hasWaitingPlaceholderTarget) {
       this.waitingPlaceholderTarget.remove()
     }
+  }
+
+  formatMessageTimestamp() {
+    return new Intl.DateTimeFormat(undefined, {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false
+    }).format(new Date())
   }
 
   // Handle peer close (Heartbeat: immediate UI scrub on disconnect)
@@ -623,7 +631,7 @@ export default class extends Controller {
   appendFileDownload({ name, url, size, isSent = false }) {
     this.clearWaitingPlaceholder()
 
-    const timestamp = new Date().toLocaleTimeString()
+    const timestamp = this.formatMessageTimestamp()
     const safeName = this.normalizeFileName(name)
     const safeSize = this.normalizeFileSize(size)
 
