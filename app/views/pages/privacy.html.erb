@@ -4,14 +4,18 @@
   <%# ── Top nav ─────────────────────────────────────────────────────── %>
   <header class="flex items-center justify-between px-6 py-5 max-w-2xl mx-auto">
     <%= render "shared/logo", size: "sm" %>
-    <span class="flex items-center gap-2 text-xs font-mono text-signal-green">
-      <span class="w-2 h-2 rounded-full bg-signal-green animate-pulse"></span>
-      Zero-Trace Active
-    </span>
+    <span class="text-xs font-mono text-secure-gray tracking-wide">Zero-Knowledge Architecture</span>
   </header>
 
   <%# ── Content ─────────────────────────────────────────────────────── %>
   <div class="max-w-2xl mx-auto px-6 pb-16 text-trace-white font-sans">
+
+    <%# Section jump nav %>
+    <nav class="flex gap-5 mb-6 pb-4 border-b border-white/8" aria-label="Page sections">
+      <a href="#privacy-policy" class="text-xs font-mono text-secure-gray hover:text-trace-white transition-colors tracking-wide uppercase">Privacy</a>
+      <a href="#target-audience" class="text-xs font-mono text-secure-gray hover:text-trace-white transition-colors tracking-wide uppercase">Audience</a>
+      <a href="#faq" class="text-xs font-mono text-secure-gray hover:text-trace-white transition-colors tracking-wide uppercase">FAQ</a>
+    </nav>
 
     <%# Philosophy badge %>
     <div class="mb-8 glass px-5 py-4 border-l-4 border-status-blue">
@@ -22,7 +26,7 @@
 
     <%# ── Privacy Policy ─────────────────────────────────────────────── %>
     <section id="privacy-policy" class="mb-12">
-      <h2 class="text-xl font-semibold text-trace-white mb-6">Privacy Policy</h2>
+      <h2 class="text-xl font-semibold text-trace-white mb-6 pt-6 border-t border-white/8">Privacy Policy</h2>
       <div class="space-y-6">
         <div>
           <h3 class="text-sm font-semibold text-trace-white mb-3">Our Privacy Philosophy</h3>
@@ -113,7 +117,7 @@
 
     <%# ── Target Audience ─────────────────────────────────────────────── %>
     <section id="target-audience" class="mb-12">
-      <h2 class="text-xl font-semibold text-trace-white mb-6">Target Audience</h2>
+      <h2 class="text-xl font-semibold text-trace-white mb-6 pt-6 border-t border-white/8">Target Audience</h2>
       <div class="space-y-3">
         <div class="glass px-5 py-4">
           <h3 class="text-sm font-semibold text-trace-white mb-1">Journalists &amp; Whistleblowers</h3>
@@ -140,7 +144,7 @@
 
     <%# ── FAQ ─────────────────────────────────────────────────────────── %>
     <section id="faq" class="mb-12">
-      <h2 class="text-xl font-semibold text-trace-white mb-6">FAQ</h2>
+      <h2 class="text-xl font-semibold text-trace-white mb-6 pt-6 border-t border-white/8">FAQ</h2>
       <div class="space-y-2">
 
         <details class="glass px-5 py-4 cursor-pointer group">
