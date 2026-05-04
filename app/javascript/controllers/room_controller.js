@@ -8,6 +8,7 @@ import { devLog } from "modules/dev_logger"
 // Manages room lifecycle, signaling, and P2P encrypted messaging UI.
 export default class extends Controller {
   static targets = [
+    "inviteSection",
     "messagesContainer",
     "waitingPlaceholder",
     "messageInput",
@@ -510,6 +511,7 @@ export default class extends Controller {
       this.state.signaling = false
       this.statusDotTarget.className = "w-3 h-3 rounded-full bg-green-500"
       this.statusDotTarget.classList.remove("animate-pulse")
+      if (this.hasInviteSectionTarget) this.inviteSectionTarget.classList.add("hidden")
       // Auto-dismiss QR modal when P2P connects
       if (this.hasQrModalTarget) this.qrModalTarget.classList.add("hidden")
       // Auto-dismiss handshake phrase display when P2P connects
