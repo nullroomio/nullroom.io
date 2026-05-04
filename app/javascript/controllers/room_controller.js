@@ -489,6 +489,11 @@ export default class extends Controller {
     const ttlSeconds = this.roomTtlSecondsValue > 0 ? this.roomTtlSecondsValue : (15 * 60)
     const duration = ttlSeconds * 1000
 
+    // Set initial display immediately so the HTML placeholder never shows
+    const initMinutes = Math.floor(ttlSeconds / 60)
+    const initSeconds = ttlSeconds % 60
+    this.timerDisplayTarget.textContent = `${String(initMinutes).padStart(2, "0")}:${String(initSeconds).padStart(2, "0")}`
+
     this.state.timerInterval = setInterval(() => {
       const elapsed = Date.now() - startTime
       const remaining = Math.max(0, duration - elapsed)
