@@ -125,7 +125,7 @@ export default class extends Controller {
     // Handle peer connection established
     this.state.peer.on("connect", () => {
       if (this.state.p2p) return // guard against duplicate connect events
-      this.updateStatus(true, "🔒 Secure P2P (Quantum-Safe)")
+      this.updateStatus(true, "🔒 Secure P2P")
       this.clearWaitingPlaceholder()
       this.messageInputTarget.disabled = false
       this.sendButtonTarget.disabled = false

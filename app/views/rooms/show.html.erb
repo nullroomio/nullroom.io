@@ -32,10 +32,13 @@
         >Room Status: Signaling…</span>
       </div>
       <div class="flex items-center gap-3">
-        <span
-          data-room-target="timerDisplay"
-          class="font-mono text-sm text-trace-white tabular-nums"
-        >30:00</span>
+        <span class="flex items-center gap-1.5 font-mono tabular-nums">
+          <span class="text-xs text-secure-gray">Expires in</span>
+          <span
+            data-room-target="timerDisplay"
+            class="text-sm text-trace-white"
+          >30:00</span>
+        </span>
         <button
           data-action="room#destroyRoom"
           aria-label="Destroy room"
