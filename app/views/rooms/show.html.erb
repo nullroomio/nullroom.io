@@ -118,10 +118,10 @@
       data-room-target="messagesContainer"
       class="flex-1 min-h-64 max-h-96 overflow-y-auto px-5 py-4 space-y-2"
     >
-      <p data-room-target="waitingPlaceholder"
-         class="text-xs font-mono text-secure-gray text-center py-12">
-        Waiting for peer to join…
-      </p>
+      <div data-room-target="waitingPlaceholder" class="text-center py-12">
+        <p class="text-xs font-mono text-secure-gray">Waiting for peer to join…</p>
+        <p class="text-xs font-mono text-secure-gray/50 mt-1">↑ Share the link above to invite</p>
+      </div>
     </div>
 
     <%# ── Message input & actions ──────────────────────────────────────── %>
