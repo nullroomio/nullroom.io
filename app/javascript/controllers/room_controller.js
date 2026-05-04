@@ -396,6 +396,8 @@ export default class extends Controller {
 
   // Destroy Room button: notify peer, clean up, and return home.
   destroyRoom() {
+    if (!window.confirm("Destroy this room? This will end the session for both participants and cannot be undone.")) return
+
     if (this.state.timerInterval) {
       clearInterval(this.state.timerInterval)
     }

@@ -31,10 +31,20 @@
           class="text-xs font-mono text-secure-gray tracking-widest uppercase"
         >Room Status: Signaling…</span>
       </div>
-      <span
-        data-room-target="timerDisplay"
-        class="font-mono text-sm text-trace-white tabular-nums"
-      >30:00</span>
+      <div class="flex items-center gap-3">
+        <span
+          data-room-target="timerDisplay"
+          class="font-mono text-sm text-trace-white tabular-nums"
+        >30:00</span>
+        <button
+          data-action="room#destroyRoom"
+          aria-label="Destroy room"
+          title="Destroy room - ends the session for both participants"
+          class="shrink-0 p-1.5 rounded-lg border border-red-800/60 text-red-400/70 hover:text-red-400 hover:bg-red-950/50 hover:border-red-700 active:scale-95 transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-red-500 cursor-pointer"
+        >
+          <%= render "shared/icon", name: "trash", css: "w-3.5 h-3.5" %>
+        </button>
+      </div>
     </div>
 
     <%# ── Room link (privacy shroud by default) ───────────────────────── %>
@@ -129,14 +139,6 @@
         class="shrink-0 p-2.5 rounded-lg bg-status-blue text-white hover:brightness-110 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-status-blue cursor-pointer"
       >
         <%= render "shared/icon", name: "send", css: "w-4 h-4" %>
-      </button>
-      <button
-        data-action="room#destroyRoom"
-        aria-label="Destroy room"
-        class="shrink-0 flex items-center gap-1.5 px-3 py-2.5 rounded-lg border border-red-800/60 text-red-400 text-xs font-sans hover:bg-red-950/50 hover:border-red-700 active:scale-95 transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-red-500 cursor-pointer"
-      >
-        <%= render "shared/icon", name: "trash", css: "w-4 h-4" %>
-        <span class="hidden sm:inline">Destroy Room</span>
       </button>
     </div>
 
