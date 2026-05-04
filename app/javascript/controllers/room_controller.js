@@ -324,7 +324,7 @@ export default class extends Controller {
     const timestamp = this.formatMessageTimestamp()
     const timestampClass = isMine ? "text-green-400" : "text-blue-400"
     const messageEl = document.createElement("div")
-    messageEl.className = `px-3 py-2 text-xs font-mono ${
+    messageEl.className = `px-3 py-2 text-xs font-mono rounded-lg ${
       isMine
         ? "bg-green-900 bg-opacity-20 text-green-300 ml-8"
         : "bg-blue-900 bg-opacity-20 text-blue-300 mr-8"
@@ -645,7 +645,7 @@ export default class extends Controller {
 
     if (isSent) {
       // Outgoing: matches sent text message style — green, pushed to the right
-      el.className = "px-3 py-2 text-xs font-mono bg-green-900 bg-opacity-20 text-green-300 ml-8"
+      el.className = "px-3 py-2 text-xs font-mono rounded-lg bg-green-900 bg-opacity-20 text-green-300 ml-8"
       timestampEl.className = "text-green-400 text-xs"
 
       const rowEl = document.createElement("div")
@@ -673,7 +673,7 @@ export default class extends Controller {
       el.appendChild(rowEl)
     } else {
       // Incoming: blue bubble with a clickable download anchor
-      el.className = "px-3 py-2 text-xs font-mono bg-blue-900 bg-opacity-20 text-blue-300 mr-8"
+      el.className = "px-3 py-2 text-xs font-mono rounded-lg bg-blue-900 bg-opacity-20 text-blue-300 mr-8"
       timestampEl.className = "text-blue-400 text-xs"
 
       const linkEl = document.createElement("a")
