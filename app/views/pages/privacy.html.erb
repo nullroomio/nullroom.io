@@ -42,19 +42,19 @@
           <dl class="space-y-2">
             <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
               <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">Personal Info</dt>
-              <dd class="text-sm text-secure-gray mt-1 sm:mt-0">No names, emails, phone numbers, or accounts.</dd>
+              <dd class="text-sm text-secure-gray mt-1 sm:mt-0">No names, emails, phone numbers, or accounts are ever requested or stored.</dd>
             </div>
             <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
               <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">Message Content</dt>
-              <dd class="text-sm text-secure-gray mt-1 sm:mt-0">Messages are end-to-end encrypted on your device and never travel through our servers in a readable format.</dd>
+              <dd class="text-sm text-secure-gray mt-1 sm:mt-0">Messages are sent directly between peers via WebRTC and never touch our servers in any format. They are fully end-to-end encrypted before leaving your device.</dd>
             </div>
             <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
               <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">IP Addresses</dt>
-              <dd class="text-sm text-secure-gray mt-1 sm:mt-0">Server logs are disabled for all room paths.</dd>
+              <dd class="text-sm text-secure-gray mt-1 sm:mt-0">Server logging is entirely disabled in production. IP addresses are only briefly held in volatile memory to rate-limit and prevent abuse, but are never written to any persistent storage.</dd>
             </div>
             <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
               <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">Cookies</dt>
-              <dd class="text-sm text-secure-gray mt-1 sm:mt-0">No tracking or advertising cookies of any kind.</dd>
+              <dd class="text-sm text-secure-gray mt-1 sm:mt-0">Zero tracking, analytics, or advertising cookies. A generic session cookie is used transiently only during the Monero donation flow and is cleared right after.</dd>
             </div>
           </dl>
         </div>
@@ -64,11 +64,11 @@
           <dl class="space-y-2">
             <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
               <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">Room UUIDs</dt>
-              <dd class="text-sm text-secure-gray mt-1 sm:mt-0">Stored in volatile memory (Redis) and purged after 15 minutes.</dd>
+              <dd class="text-sm text-secure-gray mt-1 sm:mt-0">Stored in volatile memory (Redis) and purged after 15 minutes to enforce session expiration.</dd>
             </div>
             <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
               <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">Signaling Metadata</dt>
-              <dd class="text-sm text-secure-gray mt-1 sm:mt-0">Encrypted connection details are relayed during the WebRTC handshake and never stored.</dd>
+              <dd class="text-sm text-secure-gray mt-1 sm:mt-0">For standard link sharing, encrypted connection details are instantly relayed via WebSockets without ever being saved. If you use the optional 4-word handshake phrase, the encrypted connection blob is stored in memory for up to 3 minutes and acts as a strict "one-time read" before being instantly deleted.</dd>
             </div>
           </dl>
         </div>
@@ -108,7 +108,7 @@
             </div>
             <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
               <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">Payments</dt>
-              <dd class="text-sm text-secure-gray mt-1 sm:mt-0">Handled by Stripe via a "Blind Token" system to decouple payment identity from chat sessions.</dd>
+              <dd class="text-sm text-secure-gray mt-1 sm:mt-0">Donation payments are processed anonymously via Monero. We use a "Blind Token" signature system to ensure that your payment identity is strictly decoupled from your chat sessions.</dd>
             </div>
           </dl>
         </div>
@@ -119,26 +119,32 @@
     <section id="target-audience" class="mb-12">
       <h2 class="text-xl font-semibold text-trace-white mb-6 pt-6 border-t border-white/8">Target Audience</h2>
       <div class="space-y-3">
-        <div class="glass px-5 py-4">
-          <h3 class="text-sm font-semibold text-trace-white mb-1">Journalists &amp; Whistleblowers</h3>
-          <p class="text-sm text-secure-gray leading-relaxed">Ideal for high-stakes initial contact where installing a permanent app is a liability. The "zero-trace" architecture protects the pattern of communication from being discovered on a seized device.</p>
-        </div>
+
         <div class="glass px-5 py-4">
           <h3 class="text-sm font-semibold text-trace-white mb-1">Developers &amp; IT Teams</h3>
-          <p class="text-sm text-secure-gray leading-relaxed">Perfect for sharing one-time secrets, such as API keys or database credentials, that should never be stored in a persistent Slack or email history.</p>
+          <p class="text-sm text-secure-gray leading-relaxed">Perfect for sharing production secrets—like <strong>database credentials, .env files, or SSH keys</strong>—that should never, ever be copy-pasted into a permanent Slack history or email thread.</p>
         </div>
+
+        <div class="glass px-5 py-4">
+          <h3 class="text-sm font-semibold text-trace-white mb-1">Journalists &amp; High-Risk Travelers</h3>
+          <p class="text-sm text-secure-gray leading-relaxed">Ideal for high-stakes contact or border crossings where <strong>the mere presence of an installed privacy app is a liability</strong>. Since nullroom runs entirely in the browser and vanishes on tab-close, it leaves no icon or data footprint behind on a seized device.</p>
+        </div>
+
+        <div class="glass px-5 py-4">
+          <h3 class="text-sm font-semibold text-trace-white mb-1">Lawyers &amp; Legal Counsel</h3>
+          <p class="text-sm text-secure-gray leading-relaxed">Enables highly sensitive intial consultations and <strong>attorney-client privilege protection</strong> without generating metadata records across corporate email servers or telecom providers.</p>
+        </div>
+
+        <div class="glass px-5 py-4">
+          <h3 class="text-sm font-semibold text-trace-white mb-1">One-Time Collaborators &amp; Contractors</h3>
+          <p class="text-sm text-secure-gray leading-relaxed">Great for cross-company teams or freelancers who need to coordinate quickly and share sensitive assets <strong>without provisioning accounts or joining a shared workspace</strong>.</p>
+        </div>
+
         <div class="glass px-5 py-4">
           <h3 class="text-sm font-semibold text-trace-white mb-1">Privacy-Conscious Individuals</h3>
-          <p class="text-sm text-secure-gray leading-relaxed">Useful for those wanting to avoid "Chat Control" or regulatory scanning. Provides a "blind" space for conversations that aren't tied to a phone number or email address.</p>
+          <p class="text-sm text-secure-gray leading-relaxed">Useful for those wanting to avoid "Chat Control" or corporate AI training scrapes. Provides a "blind" space for conversations that <strong>aren't tied directly to your legal identity</strong> via a phone number or email address.</p>
         </div>
-        <div class="glass px-5 py-4">
-          <h3 class="text-sm font-semibold text-trace-white mb-1">One-Time Collaborators</h3>
-          <p class="text-sm text-secure-gray leading-relaxed">Great for people who need to coordinate quickly - like a buyer and seller on a marketplace - without exchanging personal contact info or creating a permanent social link.</p>
-        </div>
-        <div class="glass px-5 py-4">
-          <h3 class="text-sm font-semibold text-trace-white mb-1">Travelers in Sensitive Regions</h3>
-          <p class="text-sm text-secure-gray leading-relaxed">Safe for users in areas with heavy surveillance where the mere presence of a "privacy app" can be a risk. Since nullroom runs entirely in the browser and vanishes on tab-close, it leaves no icon or data footprint behind.</p>
-        </div>
+
       </div>
     </section>
 
@@ -149,58 +155,58 @@
 
         <details class="glass px-5 py-4 cursor-pointer group">
           <summary class="text-sm font-semibold text-trace-white group-hover:text-status-blue transition-colors list-none">Why nullroom over other encrypted messaging apps?</summary>
-          <p class="text-sm text-secure-gray mt-3 leading-relaxed"><span class="text-trace-white font-medium">Traditional Apps:</span> Require you to install an app, verify a phone number, and create an account. You become a permanent contact in someone's database - even if you only wanted a one-time conversation.<br><br><span class="text-trace-white font-medium">nullroom.io:</span> No app, no sign-up, no phone number, no account. Just click "Create Secure Room", share a URL, and chat. The moment you close the tab, everything vanishes.</p>
+          <p class="text-sm text-secure-gray mt-3 leading-relaxed"><span class="text-trace-white font-medium">Traditional Apps:</span> Require you to install an app, verify a phone number, and create an account. You become a permanent contact in someone's database - even if you only wanted a one-time conversation.<br><br><span class="text-trace-white font-medium">nullroom.io:</span> No app, no sign-up, no phone number, no account. Just click "Create Secure Room", share a URL, and chat. <strong>The moment you close the tab, everything vanishes.</strong></p>
         </details>
 
         <details class="glass px-5 py-4 cursor-pointer group">
           <summary class="text-sm font-semibold text-trace-white group-hover:text-status-blue transition-colors list-none">What is "Zero-Trace" messaging?</summary>
           <p class="text-sm text-secure-gray mt-3 leading-relaxed">Most messaging apps store your history on their servers, even if it's encrypted. nullroom.io is designed to leave no trace:</p>
           <ul class="mt-2 space-y-1 text-sm text-secure-gray list-disc list-inside">
-            <li><span class="text-trace-white font-medium">No Accounts:</span> We don't ask for your name, email, or phone number.</li>
-            <li><span class="text-trace-white font-medium">No Logs:</span> Our servers are configured to ignore connection details.</li>
-            <li><span class="text-trace-white font-medium">No Persistence:</span> Messages live only in your browser's temporary memory.</li>
+            <li><span class="text-trace-white font-medium">No Accounts:</span> We don't ask for your <strong>name, email, or phone number</strong>.</li>
+            <li><span class="text-trace-white font-medium">No Logs:</span> Our servers are configured to <strong>ignore connection details</strong>.</li>
+            <li><span class="text-trace-white font-medium">No Persistence:</span> Messages live <strong>only in your browser's temporary memory</strong>.</li>
           </ul>
         </details>
 
         <details class="glass px-5 py-4 cursor-pointer group">
           <summary class="text-sm font-semibold text-trace-white group-hover:text-status-blue transition-colors list-none">How does the security work?</summary>
           <ol class="mt-3 space-y-1 text-sm text-secure-gray list-decimal list-inside">
-            <li><span class="text-trace-white font-medium">WebRTC (Peer-to-Peer):</span> Your device talks directly to your peer's device - messages bypass our servers.</li>
-            <li><span class="text-trace-white font-medium">Post-Quantum Key Exchange:</span> Once the direct connection opens, both peers perform an ML-KEM-768 key exchange to establish a quantum-resistant shared secret.</li>
-            <li><span class="text-trace-white font-medium">Hybrid Key Derivation:</span> The quantum secret is fused with the classical URL key via HKDF-SHA-256, producing a hybrid session key that is secure against both classical and quantum attacks.</li>
-            <li><span class="text-trace-white font-medium">Web Crypto API:</span> Every message is encrypted with the hybrid key using AES-GCM 256-bit before leaving your device (E2EE).</li>
+            <li><span class="text-trace-white font-medium">WebRTC (Peer-to-Peer):</span> Your device talks directly to your peer's device - <strong>messages bypass our servers</strong>.</li>
+            <li><span class="text-trace-white font-medium">Post-Quantum Key Exchange:</span> Once the direct connection opens, both peers perform an ML-KEM-768 key exchange to establish a <strong>quantum-resistant shared secret</strong>.</li>
+            <li><span class="text-trace-white font-medium">Hybrid Key Derivation:</span> The quantum secret is fused with the classical URL key via HKDF-SHA-256, producing a hybrid session key that is <strong>secure against both classical and quantum attacks</strong>.</li>
+            <li><span class="text-trace-white font-medium">Web Crypto API:</span> Every message is encrypted with the hybrid key using AES-GCM 256-bit <strong>before leaving your device (E2EE)</strong>.</li>
           </ol>
         </details>
 
         <details class="glass px-5 py-4 cursor-pointer group">
           <summary class="text-sm font-semibold text-trace-white group-hover:text-status-blue transition-colors list-none">If you don't have the keys, who does?</summary>
-          <p class="text-sm text-secure-gray mt-3 leading-relaxed">Only you and your peer. The initial key is appended to the URL after the <code class="font-mono text-xs text-status-blue">#</code> symbol (never sent to the server). Once connected, a second quantum-resistant secret is negotiated directly between your browsers and fused with the URL key to produce the final hybrid session key. Neither secret alone is sufficient - an attacker would need both.</p>
+          <p class="text-sm text-secure-gray mt-3 leading-relaxed">Only you and your peer. The initial key is appended to the URL after the <code class="font-mono text-xs text-status-blue">#</code> symbol (never sent to the server). Once connected, a second quantum-resistant secret is negotiated directly between your browsers and fused with the URL key to produce the final hybrid session key. Neither secret alone is sufficient - an attacker would need both. <strong>Because the URL fragment never leaves your device, it is mathematically impossible for us (or anyone compromising our servers) to decrypt your chat.</strong></p>
         </details>
 
         <details class="glass px-5 py-4 cursor-pointer group">
           <summary class="text-sm font-semibold text-trace-white group-hover:text-status-blue transition-colors list-none">What is post-quantum encryption and why does it matter?</summary>
-          <p class="text-sm text-secure-gray mt-3 leading-relaxed">Future quantum computers could break today's key-exchange algorithms (like ECDH), allowing adversaries who record encrypted traffic now to decrypt it later. nullroom uses <span class="text-trace-white font-medium">ML-KEM-768</span> (NIST FIPS 203, Security Level 3) - a lattice-based key encapsulation mechanism designed to resist quantum attacks. By combining it with the classical key, your session is protected even if one layer is eventually compromised.</p>
+          <p class="text-sm text-secure-gray mt-3 leading-relaxed">Future quantum computers could break today's key-exchange algorithms (like ECDH), allowing adversaries who record encrypted traffic now to decrypt it later. nullroom uses <span class="text-trace-white font-medium">ML-KEM-768</span> (NIST FIPS 203, Security Level 3) - a lattice-based key encapsulation mechanism designed to resist quantum attacks. By combining it with the classical key, <strong>your session is protected even if one layer is eventually compromised.</strong></p>
         </details>
 
         <details class="glass px-5 py-4 cursor-pointer group">
           <summary class="text-sm font-semibold text-trace-white group-hover:text-status-blue transition-colors list-none">How long are rooms available?</summary>
-          <p class="text-sm text-secure-gray mt-3 leading-relaxed">Rooms expire after 15 minutes. Our Redis-backed self-destruct timer permanently purges all signaling data from volatile memory once the room expires.</p>
+          <p class="text-sm text-secure-gray mt-3 leading-relaxed">Rooms expire after 15 minutes. Our Redis-backed self-destruct timer permanently purges the room access key. <strong>Once expired, the URL becomes permanently invalid for new connections.</strong></p>
         </details>
 
         <details class="glass px-5 py-4 cursor-pointer group">
           <summary class="text-sm font-semibold text-trace-white group-hover:text-status-blue transition-colors list-none">How many users can chat in a room?</summary>
-          <p class="text-sm text-secure-gray mt-3 leading-relaxed">nullroom is optimised for private 1-on-1 conversations. Each room is limited to two participants - our backend enforces a "Room Capacity Lock" to prevent third parties from joining.</p>
+          <p class="text-sm text-secure-gray mt-3 leading-relaxed">nullroom is optimised for private 1-on-1 conversations. Each room is limited to two participants - <strong>our backend enforces a "Room Capacity Lock" to prevent third parties from joining.</strong></p>
         </details>
 
         <details class="glass px-5 py-4 cursor-pointer group">
           <summary class="text-sm font-semibold text-trace-white group-hover:text-status-blue transition-colors list-none">Can I access a room from multiple devices?</summary>
-          <p class="text-sm text-secure-gray mt-3 leading-relaxed">No. The encryption key is stored in your browser's URL fragment (<code class="font-mono text-xs text-status-blue">#</code>) - it never leaves your device. To maintain the Zero-Trace promise, the key is not synced to any cloud service.</p>
+          <p class="text-sm text-secure-gray mt-3 leading-relaxed">No. The encryption key is stored in your browser's URL fragment (<code class="font-mono text-xs text-status-blue">#</code>) - <strong>it never leaves your device.</strong> To maintain the Zero-Trace promise, <strong>the key is not synced to any cloud service.</strong></p>
         </details>
 
         <details class="glass px-5 py-4 cursor-pointer group">
           <summary class="text-sm font-semibold text-trace-white group-hover:text-status-blue transition-colors list-none">Is Nullroom open source?</summary>
           <p class="text-sm text-secure-gray mt-3 leading-relaxed">
-            Yes. The source code is available on GitHub:
+            Yes. We believe privacy tools must be fully transparent. <strong>Don't just trust our claims - read the code or audit the cryptography.</strong> The entire source code is available on GitHub:
             <a href="https://github.com/nullroomio/nullroom.io" target="_blank" rel="noopener noreferrer" class="text-status-blue hover:text-status-blue-dark underline">https://github.com/nullroomio/nullroom.io</a>
           </p>
         </details>
