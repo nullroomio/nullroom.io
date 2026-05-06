@@ -134,6 +134,12 @@ export default class extends Controller {
       if (this.state.fileSharing) {
         this._initFileTransfer()
       }
+      // P2P Timer Sync: initiator sends remaining time to joiner
+      if (this.isInitiator) {
+        const elapsed = Date.now() - this.state.timerStartTime
+        const remainingSeconds = Math.max(0, Math.floor((this.state.timerDuration - elapsed) / 1000))
+        this.sendControlMessage({ type: "timer_sync", remaining_seconds: remainingSeconds })
+      }
     })
 
     // Handle DataChannel open — trigger PQ upgrade before enabling messaging
@@ -300,11 +306,20 @@ export default class extends Controller {
     }
   }
 
-  // Decrypt incoming P2P data and render it in the UI.
+  // Decrypt incoming P2P data and render it in the UI (or route control messages).
   async handleIncomingMessage(encryptedString) {
     try {
       // Decrypt message
       const plaintext = await decrypt(encryptedString.toString(), this.state.encryptionKey)
+
+      // Control message prefix: \x01 (SOH) indicates a JSON control message
+      if (plaintext.charCodeAt(0) === 0x01) {
+        const json = plaintext.substring(1)
+        const msg = JSON.parse(json)
+        this.handleControlMessage(msg)
+        return
+      }
+
       const safeText = this.normalizeChatText(plaintext)
 
       // Display in UI
@@ -312,6 +327,30 @@ export default class extends Controller {
     } catch (error) {
       console.error("Error decrypting message:", error)
       this.showError("Failed to decrypt message")
+    }
+  }
+
+  // Route incoming control messages by type.
+  handleControlMessage(msg) {
+    switch (msg.type) {
+      case "timer_sync":
+        devLog("[Room] Received timer_sync:", msg.remaining_seconds, "seconds")
+        this.resetTimer(msg.remaining_seconds)
+        break
+      default:
+        devLog("[Room] Unknown control message type:", msg.type)
+    }
+  }
+
+  // Encrypt and send a control message over the P2P data channel.
+  async sendControlMessage(payload) {
+    try {
+      const raw = "\x01" + JSON.stringify(payload)
+      const encrypted = await encrypt(raw, this.state.encryptionKey)
+      this.state.peer.send(encrypted)
+      devLog("[Room] Sent control message:", payload.type)
+    } catch (error) {
+      console.error("Error sending control message:", error)
     }
   }
 
@@ -489,9 +528,48 @@ export default class extends Controller {
     const ttlSeconds = this.roomTtlSecondsValue > 0 ? this.roomTtlSecondsValue : (15 * 60)
     const duration = ttlSeconds * 1000
 
+    // Track timer metadata for P2P sync
+    this.state.timerStartTime = startTime
+    this.state.timerDuration = duration
+
     // Set initial display immediately so the HTML placeholder never shows
     const initMinutes = Math.floor(ttlSeconds / 60)
     const initSeconds = ttlSeconds % 60
+    this.timerDisplayTarget.textContent = `${String(initMinutes).padStart(2, "0")}:${String(initSeconds).padStart(2, "0")}`
+
+    this.state.timerInterval = setInterval(() => {
+      const elapsed = Date.now() - startTime
+      const remaining = Math.max(0, duration - elapsed)
+
+      const minutes = Math.floor(remaining / 1000 / 60)
+      const seconds = Math.floor((remaining / 1000) % 60)
+
+      this.timerDisplayTarget.textContent = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`
+
+      if (remaining <= 0) {
+        clearInterval(this.state.timerInterval)
+        this.messageInputTarget.disabled = true
+        this.timerDisplayTarget.textContent = "00:00"
+      }
+    }, 1000)
+  }
+
+  // Reset the countdown timer to a specific remaining value (used for P2P sync).
+  resetTimer(remainingSeconds) {
+    if (this.state.timerInterval) {
+      clearInterval(this.state.timerInterval)
+    }
+
+    const startTime = Date.now()
+    const duration = remainingSeconds * 1000
+
+    // Update metadata
+    this.state.timerStartTime = startTime
+    this.state.timerDuration = duration
+
+    // Set initial display
+    const initMinutes = Math.floor(remainingSeconds / 60)
+    const initSeconds = Math.floor(remainingSeconds % 60)
     this.timerDisplayTarget.textContent = `${String(initMinutes).padStart(2, "0")}:${String(initSeconds).padStart(2, "0")}`
 
     this.state.timerInterval = setInterval(() => {
