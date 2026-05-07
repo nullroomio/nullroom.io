@@ -199,6 +199,16 @@
         </details>
 
         <details class="glass px-5 py-4 cursor-pointer group">
+          <summary class="text-sm font-semibold text-trace-white group-hover:text-status-blue transition-colors list-none">How do I invite someone to a secure room?</summary>
+          <p class="text-sm text-secure-gray mt-3 leading-relaxed">Because there are no accounts or contact lists, you must securely share the room access key with your peer. We provide three ways to do this:</p>
+          <ul class="mt-2 space-y-1 text-sm text-secure-gray list-disc list-inside">
+            <li><span class="text-trace-white font-medium">Direct Link:</span> Copy and paste the full secure URL via a trusted secondary channel.</li>
+            <li><span class="text-trace-white font-medium">QR Code:</span> If your peer is physically next to you, they can simply scan the on-screen QR code to join instantly without sending anything over the internet.</li>
+            <li><span class="text-trace-white font-medium">4-Word Phrase:</span> A temporary, easy-to-read phrase you can read over the phone or a voice call. This phrase acts as a one-time handshake to safely exchange the full encryption keys.</li>
+          </ul>
+        </details>
+
+        <details class="glass px-5 py-4 cursor-pointer group">
           <summary class="text-sm font-semibold text-trace-white group-hover:text-status-blue transition-colors list-none">Can I access a room from multiple devices?</summary>
           <p class="text-sm text-secure-gray mt-3 leading-relaxed">No. The encryption key is stored in your browser's URL fragment (<code class="font-mono text-xs text-status-blue">#</code>) - <strong>it never leaves your device.</strong> To maintain the Zero-Trace promise, <strong>the key is not synced to any cloud service.</strong></p>
         </details>
