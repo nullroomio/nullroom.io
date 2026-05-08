@@ -73,9 +73,11 @@ async function verifyConfirmHmac(sharedSecret, label, received) {
  * @param {CryptoKey} classicalKey The AES-GCM key from the URL fragment
  * @param {boolean} isInitiator Whether this peer is the connection initiator
  * @param {Promise} mlkemReady A promise that resolves when the mlkem module is initialized
+ * @param {function} [onProgress] Optional callback for boot sequence progress messages
  * @returns {Promise<CryptoKey>} The hybrid AES-GCM key (K_H)
  */
-export async function performPQUpgrade(peer, classicalKey, isInitiator, mlkemReady) {
+export async function performPQUpgrade(peer, classicalKey, isInitiator, mlkemReady, onProgress) {
+  const progress = typeof onProgress === "function" ? onProgress : () => {}
   // Wait for ML-KEM library to be ready
   const mlkem = await mlkemReady
 
@@ -119,6 +121,7 @@ export async function performPQUpgrade(peer, classicalKey, isInitiator, mlkemRea
       // Step 1: Generate keypair and send public key
       const { publicKey, secretKey } = await mlkem.generateKeyPair()
       devLog("[PQ] Initiator: generated ML-KEM-768 keypair", { publicKeyBytes: publicKey.length })
+      progress(">> EXCHANGING_ML-KEM-768_PUBLIC_SHARES...")
       peer.send(JSON.stringify({ type: "pq-pubkey", data: toBase64(publicKey) }))
       devLog("[PQ] Initiator: sent pq-pubkey")
 
@@ -148,6 +151,8 @@ export async function performPQUpgrade(peer, classicalKey, isInitiator, mlkemRea
           return
         }
 
+        progress(">> VERIFYING_MUTUAL_HMAC_INTEGRITY...")
+
         // Send our confirmation HMAC
         const initiatorHmac = await computeConfirmHmac(sharedSecret, CONFIRM_LABEL_INITIATOR)
         peer.send(JSON.stringify({ type: "pq-confirm", data: toBase64(initiatorHmac) }))
@@ -156,6 +161,7 @@ export async function performPQUpgrade(peer, classicalKey, isInitiator, mlkemRea
         // Derive hybrid key
         const hybridKey = await deriveHybridKey(classicalKey, sharedSecret)
         devLog("[PQ] Initiator: hybrid key derived ✓")
+        progress(">> DERIVING_PQ_SESSION_KEYS: [HKDF-SHA-256]")
         cleanup()
         resolve(hybridKey)
       }
@@ -172,6 +178,7 @@ export async function performPQUpgrade(peer, classicalKey, isInitiator, mlkemRea
         // Encapsulate to produce ciphertext + shared secret
         const { ciphertext, sharedSecret } = await mlkem.encapsulate(publicKey)
         devLog("[PQ] Responder: encapsulated", { ciphertextBytes: ciphertext.length, secretBytes: sharedSecret.length })
+        progress(">> EXCHANGING_ML-KEM-768_PUBLIC_SHARES...")
 
         // Store shared secret for confirmation verification
         peer._pqSharedSecret = sharedSecret
@@ -202,9 +209,12 @@ export async function performPQUpgrade(peer, classicalKey, isInitiator, mlkemRea
           return
         }
 
+        progress(">> VERIFYING_MUTUAL_HMAC_INTEGRITY...")
+
         // Derive hybrid key
         const hybridKey = await deriveHybridKey(classicalKey, sharedSecret)
         devLog("[PQ] Responder: hybrid key derived ✓")
+        progress(">> DERIVING_PQ_SESSION_KEYS: [HKDF-SHA-256]")
         cleanup()
         resolve(hybridKey)
       }

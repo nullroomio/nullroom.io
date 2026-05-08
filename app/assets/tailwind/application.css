@@ -50,6 +50,37 @@
   user-select: auto;
 }
 
+/* ── Boot Sequence system log ─────────────────────────────────────── */
+.system-log {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  line-height: 1.4;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.125rem;
+  opacity: 0.5;
+  color: var(--color-secure-gray);
+  transition: opacity 0.5s ease;
+}
+.system-log--ok       { color: var(--color-signal-green); opacity: 0.6; }
+.system-log--success  { color: var(--color-signal-green); opacity: 0.9; font-weight: 600; }
+.system-log--progress { color: var(--color-trace-white);  opacity: 0.45; }
+
+/* Fade-out state applied before collapsing */
+.boot-log-faded .system-log { opacity: 0.15; }
+
+/* Collapsed toggle line */
+.boot-log-toggle {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--color-secure-gray);
+  opacity: 0.5;
+  cursor: pointer;
+  user-select: none;
+  padding: 0.125rem 0;
+  transition: opacity 0.15s ease;
+}
+.boot-log-toggle:hover { opacity: 0.8; }
+
 /* ── Privacy page ────────────────────────────────────────────────────── */
 
 /* ① FAQ chevron indicator */

@@ -28,7 +28,9 @@ export default class extends Controller {
     "fileProgressLabel",
     // QR code
     "qrModal",
-    "qrCanvas"
+    "qrCanvas",
+    // Boot sequence
+    "bootLogContainer"
   ]
 
   static values = {
@@ -58,6 +60,7 @@ export default class extends Controller {
     }
     this.sender   = null
     this.receiver = null
+    this._bootLogQueue = Promise.resolve()
 
     // Populate share link with full URL including hash
     if (this.hasShareLinkTarget) {
@@ -79,6 +82,9 @@ export default class extends Controller {
 
       // Import encryption key
       this.state.encryptionKey = await importKey(keyString)
+
+      // Boot log — first line (role-specific message added after init)
+      this.appendSystemLog("// GENERATING_EPHEMERAL_IDENTITY_KEYS...")
 
       // Preload ML-KEM library (runs in parallel with WebRTC negotiation)
       this.mlkemReady = import("mlkem").then(m => { m.init(); return m })
@@ -106,6 +112,7 @@ export default class extends Controller {
 
     // Store whether we're initiator
     this.isInitiator = isInitiator
+    this.appendSystemLog(">> NEGOTIATING_STUN/TURN_RELAY_CANDIDATES...", "progress")
 
     this.state.peer = new PeerConnection({
       initiator: isInitiator, // Set this for datachannel creation
@@ -144,6 +151,7 @@ export default class extends Controller {
 
     // Handle DataChannel open — trigger PQ upgrade before enabling messaging
     this.state.peer.on("datachannel-open", () => {
+      this.appendSystemLog("[OK] P2P_ENCRYPTED_TUNNEL_ESTABLISHED", "ok")
       this.performQuantumUpgrade()
     })
 
@@ -178,13 +186,17 @@ export default class extends Controller {
   async performQuantumUpgrade() {
     this.state.upgrading = true
     devLog("[Room] Starting post-quantum key upgrade")
+    this.appendSystemLog("// UPGRADING_TO_HYBRID_POST_QUANTUM_CRYPTO...")
 
     try {
+      const onProgress = (msg) => this.appendSystemLog(msg, "progress")
+
       const hybridKey = await performPQUpgrade(
         this.state.peer,
         this.state.encryptionKey,
         this.isInitiator,
-        this.mlkemReady
+        this.mlkemReady,
+        onProgress
       )
 
       // Replace the classical key with the hybrid key
@@ -192,6 +204,8 @@ export default class extends Controller {
       this.state.upgrading = false
 
       devLog("[Room] Post-quantum upgrade complete")
+      this.appendSystemLog("[SUCCESS] ZERO_TRACE_DNA_ACTIVE", "success")
+      this.collapseBootLog()
 
       // Now signal the connection as fully ready (enables UI)
       this.state.peer.confirmReady()
@@ -209,6 +223,8 @@ export default class extends Controller {
       {
         connected: () => {
           devLog("[Room] Connected to RoomChannel")
+          this.appendSystemLog("// ESTABLISHING_SIGNALING_CHANNEL_VIA_SSL...")
+          this.appendSystemLog("[OK] WAITING_FOR_REMOTE_PEER...", "ok")
         },
         disconnected: () => {
           devLog("[Room] Disconnected from RoomChannel")
@@ -224,9 +240,15 @@ export default class extends Controller {
             this.state.fileSharing  = data.file_sharing === true
             this.state.fileSizeLimit = Number(data.file_size_limit) > 0 ? Number(data.file_size_limit) : FILE_SIZE_LIMIT
             devLog("[Room] Received init event")
+            if (data.initiator) {
+              this.appendSystemLog("// INITIALIZING_NULLROOM_INSTANCE_V1.0...")
+            } else {
+              this.appendSystemLog("// JOINING_NULLROOM_INSTANCE...")
+            }
             this.initializePeer(data.initiator)
           } else if (data.type === "peer_ready") {
             // Second peer is ready, initiator can now create offer
+            this.appendSystemLog(">> REMOTE_PEER_DETECTED: [HANDSHAKE_INITIATED]", "progress")
             if (this.isInitiator && this.state.peer) {
               devLog("[Room] Peer ready")
               this.state.peer.createOffer()
@@ -390,6 +412,67 @@ export default class extends Controller {
     if (this.hasWaitingPlaceholderTarget) {
       this.waitingPlaceholderTarget.remove()
     }
+  }
+
+  // ── Boot Sequence Log ───────────────────────────────────────────────
+
+  // Append a system log line to the boot log container with staggered timing.
+  // Uses .textContent exclusively (S-13: no .innerHTML to prevent XSS).
+  appendSystemLog(message, type = "info") {
+    const STAGGER_MS = 100
+    this._bootLogQueue = this._bootLogQueue.then(() => new Promise(resolve => {
+      setTimeout(() => {
+        if (!this.hasBootLogContainerTarget) { resolve(); return }
+
+        const entry = document.createElement("div")
+        entry.className = "system-log"
+        if (type === "ok")       entry.classList.add("system-log--ok")
+        if (type === "success")  entry.classList.add("system-log--success")
+        if (type === "progress") entry.classList.add("system-log--progress")
+
+        const now = new Date()
+        const ts = new Intl.DateTimeFormat(undefined, {
+          hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false, fractionalSecondDigits: 3
+        }).format(now)
+        entry.textContent = `[${ts}] ${message}`
+
+        this.bootLogContainerTarget.appendChild(entry)
+        this.messagesContainerTarget.scrollTop = this.messagesContainerTarget.scrollHeight
+        resolve()
+      }, STAGGER_MS)
+    }))
+  }
+
+  // Collapse boot log entries into a single toggle line after a delay.
+  collapseBootLog() {
+    setTimeout(() => {
+      if (!this.hasBootLogContainerTarget) return
+
+      const container = this.bootLogContainerTarget
+
+      // Fade entries
+      container.classList.add("boot-log-faded")
+
+      // After fade transition, collapse
+      setTimeout(() => {
+        // Hide log entries
+        const entries = container.querySelectorAll(".system-log")
+        entries.forEach(el => el.style.display = "none")
+
+        // Create toggle line
+        const toggle = document.createElement("div")
+        toggle.className = "boot-log-toggle"
+        toggle.textContent = "▸ View Handshake Details"
+        let expanded = false
+        toggle.addEventListener("click", () => {
+          expanded = !expanded
+          entries.forEach(el => el.style.display = expanded ? "" : "none")
+          toggle.textContent = expanded ? "▾ Hide Handshake Details" : "▸ View Handshake Details"
+          container.classList.toggle("boot-log-faded", !expanded)
+        })
+        container.appendChild(toggle)
+      }, 500)
+    }, 2000)
   }
 
   formatMessageTimestamp() {
