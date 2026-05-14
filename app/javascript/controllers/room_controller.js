@@ -132,7 +132,7 @@ export default class extends Controller {
     // Handle peer connection established
     this.state.peer.on("connect", () => {
       if (this.state.p2p) return // guard against duplicate connect events
-      this.updateStatus(true, "🔒 Secure P2P")
+      this.updateStatus(this.state.connectionType === "relay" ? "relay" : "direct")
       this.clearWaitingPlaceholder()
       this.messageInputTarget.disabled = false
       this.sendButtonTarget.disabled = false
@@ -201,6 +201,7 @@ export default class extends Controller {
       this.appendSystemLog("[!!] UDP_PORT_3478_BLOCKED", "warn")
       this.appendSystemLog("[!!] TURN_TLS_HANDSHAKE_FAILED (DPI_DETECTED)", "warn")
       this.appendSystemLog("[ERROR] CONNECTION_FAILED: RESTRICTIVE_FIREWALL_DETECTED", "error")
+      this.updateStatus("blocked")
     })
 
     // Handle peer close or error (Heartbeat: immediate UI scrub)
@@ -528,7 +529,7 @@ export default class extends Controller {
     this.messagesContainerTarget.textContent = ""
 
     // Update status
-    this.updateStatus(false, "🔒 Room Terminated — One participant left")
+    this.updateStatus("terminated")
 
     // Disable input and send button
     this.messageInputTarget.disabled = true
@@ -708,22 +709,50 @@ export default class extends Controller {
   }
 
   // Update status indicator and internal state flags.
-  updateStatus(isP2P, statusText) {
-    if (isP2P) {
-      this.state.p2p = true
-      this.state.signaling = false
-      this.statusDotTarget.className = "w-3 h-3 rounded-full bg-green-500"
-      this.statusDotTarget.classList.remove("animate-pulse")
-      if (this.hasInviteSectionTarget) this.inviteSectionTarget.classList.add("hidden")
-      // Auto-dismiss QR modal when P2P connects
-      if (this.hasQrModalTarget) this.qrModalTarget.classList.add("hidden")
-      // Auto-dismiss handshake phrase display when P2P connects
-      this.element.dispatchEvent(new CustomEvent("room:peer-connected", { bubbles: true }))
-    } else {
-      this.statusDotTarget.className = "w-3 h-3 rounded-full bg-red-500"
+  updateStatus(connectionState) {
+    const states = {
+      signaling: {
+        dot: "w-2.5 h-2.5 rounded-full bg-yellow-400 animate-pulse",
+        text: "NEGOTIATING...",
+        tooltip: "Finding the most secure path..."
+      },
+      direct: {
+        dot: "w-2.5 h-2.5 rounded-full bg-green-500",
+        text: "\uD83D\uDD12 DIRECT SECURE P2P",
+        tooltip: "Pure decentralized link. No middleman, zero metadata."
+      },
+      relay: {
+        dot: "w-2.5 h-2.5 rounded-full bg-status-blue",
+        text: "\uD83D\uDD12 SECURE RELAY",
+        tooltip: "Encrypted via relay. Content private; relay metadata transient."
+      },
+      blocked: {
+        dot: "w-2.5 h-2.5 rounded-full bg-red-500",
+        text: "FIREWALL BLOCK",
+        tooltip: "Direct & Relay paths blocked by your network. Try a VPN."
+      },
+      terminated: {
+        dot: "w-2.5 h-2.5 rounded-full bg-red-500",
+        text: "\uD83D\uDD12 Room Terminated \u2014 One participant left",
+        tooltip: ""
+      }
     }
 
-    this.statusTextTarget.textContent = statusText
+    const s = states[connectionState]
+    if (!s) return
+
+    this.statusDotTarget.className = s.dot
+    this.statusTextTarget.textContent = s.text
+    this.statusTextTarget.title = s.tooltip
+
+    // P2P-connected states: unlock UI
+    if (connectionState === "direct" || connectionState === "relay") {
+      this.state.p2p = true
+      this.state.signaling = false
+      if (this.hasInviteSectionTarget) this.inviteSectionTarget.classList.add("hidden")
+      if (this.hasQrModalTarget) this.qrModalTarget.classList.add("hidden")
+      this.element.dispatchEvent(new CustomEvent("room:peer-connected", { bubbles: true }))
+    }
   }
 
   // Show a transient error toast.

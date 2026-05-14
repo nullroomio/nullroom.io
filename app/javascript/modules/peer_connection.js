@@ -119,11 +119,14 @@ export class PeerConnection {
       if (!pair) return "direct"
 
       const localCandidate = stats.get(pair.localCandidateId)
-      const candidateType = localCandidate && localCandidate.candidateType
+      const remoteCandidate = stats.get(pair.remoteCandidateId)
 
-      // relay → relayed through TURN; host/srflx/prflx → direct
-      const connectionType = candidateType === "relay" ? "relay" : "direct"
-      devLog("[PeerConnection] Connection type:", connectionType, { candidateType })
+      const localType = localCandidate && localCandidate.candidateType
+      const remoteType = remoteCandidate && remoteCandidate.candidateType
+
+      // relay on either side → relayed through TURN; host/srflx/prflx → direct
+      const connectionType = (localType === "relay" || remoteType === "relay") ? "relay" : "direct"
+      devLog("[PeerConnection] Connection type:", connectionType, { localType, remoteType })
       return connectionType
     } catch (err) {
       devLog("[PeerConnection] getStats() failed:", err)
