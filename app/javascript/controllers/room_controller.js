@@ -112,7 +112,7 @@ export default class extends Controller {
 
     // Store whether we're initiator
     this.isInitiator = isInitiator
-    this.appendSystemLog(">> NEGOTIATING_STUN/TURN_RELAY_CANDIDATES...", "progress")
+    this._iceLoggedFirst = false
 
     this.state.peer = new PeerConnection({
       initiator: isInitiator, // Set this for datachannel creation
@@ -149,9 +149,26 @@ export default class extends Controller {
       }
     })
 
-    // Handle DataChannel open — trigger PQ upgrade before enabling messaging
-    this.state.peer.on("datachannel-open", () => {
+    // Handle DataChannel open — detect connection type, then trigger PQ upgrade
+    this.state.peer.on("datachannel-open", async () => {
       this.appendSystemLog("[OK] P2P_ENCRYPTED_TUNNEL_ESTABLISHED", "ok")
+
+      // Log gathered candidate types
+      const types = this.state.peer.getCandidateTypes()
+      const label = types.size > 0 ? [...types].join("/") : "NONE"
+      this.appendSystemLog(`[OK] LOCAL_CANDIDATES_GATHERED [${label}]`, "ok")
+      this.appendSystemLog(">> ANALYZING_PEER_PATH_AVAILABILITY...", "progress")
+
+      // Detect and log connection type (direct vs relay)
+      const connectionType = await this.state.peer.detectConnectionType()
+      this.state.connectionType = connectionType
+      if (connectionType === "relay") {
+        this.appendSystemLog("[!!] DIRECT_PATH_UNAVAILABLE (NAT_RESTRICTIVE)", "warn")
+        this.appendSystemLog("[OK] ENCRYPTED_RELAY_ESTABLISHED (VIA_TURN_TLS_443)", "ok")
+      } else {
+        this.appendSystemLog("[OK] DIRECT_P2P_PATH_ESTABLISHED", "ok")
+      }
+
       this.performQuantumUpgrade()
     })
 
@@ -169,6 +186,21 @@ export default class extends Controller {
       if (this.receiver) {
         this.receiver.handleChunk(data)
       }
+    })
+
+    // Handle ICE candidate gathering — log network topology discovery
+    this.state.peer.on("ice-candidate", () => {
+      if (!this._iceLoggedFirst) {
+        this._iceLoggedFirst = true
+        this.appendSystemLog(">> DISCOVERING_NETWORK_TOPOLOGY...", "progress")
+      }
+    })
+
+    // Handle connection failure (firewall block)
+    this.state.peer.on("connection-failed", () => {
+      this.appendSystemLog("[!!] UDP_PORT_3478_BLOCKED", "warn")
+      this.appendSystemLog("[!!] TURN_TLS_HANDSHAKE_FAILED (DPI_DETECTED)", "warn")
+      this.appendSystemLog("[ERROR] CONNECTION_FAILED: RESTRICTIVE_FIREWALL_DETECTED", "error")
     })
 
     // Handle peer close or error (Heartbeat: immediate UI scrub)
@@ -204,7 +236,8 @@ export default class extends Controller {
       this.state.upgrading = false
 
       devLog("[Room] Post-quantum upgrade complete")
-      this.appendSystemLog("[SUCCESS] ZERO_TRACE_DNA_ACTIVE", "success")
+      const suffix = this.state.connectionType === "relay" ? "SECURE_RELAY" : "PURE_DECENTRALIZED"
+      this.appendSystemLog(`[SUCCESS] ZERO_TRACE_DNA_ACTIVE (${suffix})`, "success")
       this.collapseBootLog()
 
       // Now signal the connection as fully ready (enables UI)
@@ -429,6 +462,8 @@ export default class extends Controller {
         if (type === "ok")       entry.classList.add("system-log--ok")
         if (type === "success")  entry.classList.add("system-log--success")
         if (type === "progress") entry.classList.add("system-log--progress")
+        if (type === "warn")     entry.classList.add("system-log--warn")
+        if (type === "error")    entry.classList.add("system-log--error")
 
         const now = new Date()
         const ts = new Intl.DateTimeFormat(undefined, {

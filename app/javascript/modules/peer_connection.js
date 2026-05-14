@@ -17,6 +17,7 @@ export class PeerConnection {
     this.listeners = {}
     this._connected = false
     this._pendingCandidates = []
+    this._candidateTypes = new Set()
 
     this._init()
   }
@@ -32,10 +33,22 @@ export class PeerConnection {
     // Handle ICE candidates
     this.pc.onicecandidate = (event) => {
       if (event.candidate && this.trickleIce) {
+        // Track gathered candidate types (host, srflx, relay)
+        const cType = event.candidate.type
+        if (cType) this._candidateTypes.add(cType.toUpperCase())
+        this._emit("ice-candidate", cType)
+
         this._emit("signal", {
           type: "candidate",
           candidate: event.candidate
         })
+      }
+    }
+
+    // Track ICE gathering completion
+    this.pc.onicegatheringstatechange = () => {
+      if (this.pc.iceGatheringState === "complete") {
+        this._emit("ice-gathering-complete", this._candidateTypes)
       }
     }
 
@@ -45,13 +58,16 @@ export class PeerConnection {
       if (this.pc.connectionState === "connected") {
         // Only re-emit connect if already confirmed (post PQ-upgrade)
         if (this._connected) this._emit("connect")
-      } else if (this.pc.connectionState === "failed" || this.pc.connectionState === "closed") {
+      } else if (this.pc.connectionState === "failed") {
+        this._emit("connection-failed")
+        this._emit("close")
+      } else if (this.pc.connectionState === "closed") {
         this._emit("close")
       }
     }
 
     this.pc.onicecandidateerror = (error) => {
-      console.warn("ICE candidate error:", error)
+      devLog("[PeerConnection] ICE candidate error:", error)
     }
 
     // If initiator, create data channel (but don't create offer yet)
@@ -70,6 +86,54 @@ export class PeerConnection {
         }
       }
     }
+  }
+
+  // Inspect the nominated ICE candidate pair to determine if connection is direct or relayed.
+  async detectConnectionType() {
+    try {
+      const stats = await this.pc.getStats()
+      let activePairId = null
+
+      // Find the nominated/succeeded candidate pair
+      stats.forEach(report => {
+        if (report.type === "transport" && report.selectedCandidatePairId) {
+          activePairId = report.selectedCandidatePairId
+        }
+      })
+
+      // Fallback: look for a succeeded candidate-pair directly
+      if (!activePairId) {
+        stats.forEach(report => {
+          if (report.type === "candidate-pair" && report.state === "succeeded" && report.nominated) {
+            activePairId = report.id
+          }
+        })
+      }
+
+      if (!activePairId) {
+        devLog("[PeerConnection] Could not determine active candidate pair")
+        return "direct"
+      }
+
+      const pair = stats.get(activePairId)
+      if (!pair) return "direct"
+
+      const localCandidate = stats.get(pair.localCandidateId)
+      const candidateType = localCandidate && localCandidate.candidateType
+
+      // relay → relayed through TURN; host/srflx/prflx → direct
+      const connectionType = candidateType === "relay" ? "relay" : "direct"
+      devLog("[PeerConnection] Connection type:", connectionType, { candidateType })
+      return connectionType
+    } catch (err) {
+      devLog("[PeerConnection] getStats() failed:", err)
+      return "direct"
+    }
+  }
+
+  // Return the set of ICE candidate types gathered so far.
+  getCandidateTypes() {
+    return this._candidateTypes
   }
 
   _createDataChannel() {
@@ -115,7 +179,7 @@ export class PeerConnection {
     }
 
     this.fileChannel.onerror = (error) => {
-      console.warn("[PeerConnection] File channel error:", error)
+      devLog("[PeerConnection] File channel error:", error)
     }
   }
 

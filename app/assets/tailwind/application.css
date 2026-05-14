@@ -64,6 +64,8 @@
 .system-log--ok       { color: var(--color-signal-green); opacity: 0.6; }
 .system-log--success  { color: var(--color-signal-green); opacity: 0.9; font-weight: 600; }
 .system-log--progress { color: var(--color-trace-white);  opacity: 0.45; }
+.system-log--warn     { color: #F59E0B; opacity: 0.7; }
+.system-log--error    { color: #EF4444; opacity: 0.9; font-weight: 600; }
 
 /* Fade-out state applied before collapsing */
 .boot-log-faded .system-log { opacity: 0.15; }
