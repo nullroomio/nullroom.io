@@ -6,6 +6,7 @@
   **The Conversation That Never Happened.**
 
   [![Test](https://github.com/nullroomio/nullroom.io/actions/workflows/test.yml/badge.svg)](https://github.com/nullroomio/nullroom.io/actions/workflows/test.yml)
+  [![Attest Build](https://github.com/nullroomio/nullroom.io/actions/workflows/attest-build.yml/badge.svg)](https://github.com/nullroomio/nullroom.io/actions/workflows/attest-build.yml)
   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
   ![Post-Quantum](https://img.shields.io/badge/Post--Quantum-ML--KEM--768-blueviolet)
   ![Zero-Knowledge](https://img.shields.io/badge/Zero--Knowledge-Architecture-black)
@@ -85,6 +86,21 @@ No database writes for room or message data. The only server-side state is volat
 | `room:<uuid>:count` | 16 min | Participant counter (max 2) |
 
 Both keys auto-expire. When a peer disconnects, the other peer's UI is immediately scrubbed and the room can optionally be destroyed in Redis on the spot.
+
+---
+
+## Verifiability
+
+nullroom is built deterministically. Every push to `main` produces a cryptographically signed attestation via GitHub Actions — proving the code you receive matches the code in this repository.
+
+Verify it yourself:
+
+```bash
+gh run download --repo nullroomio/nullroom.io -n asset-checksums
+gh attestation verify asset-checksums/checksums.sha256 --repo nullroomio/nullroom.io
+```
+
+For the full technical explanation — why the build is deterministic, how to reproduce it locally, and what's attested — see [VERIFICATION.md](VERIFICATION.md).
 
 ---
 
