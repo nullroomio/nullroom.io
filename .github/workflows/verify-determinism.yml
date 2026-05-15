@@ -1,0 +1,23 @@
+name: Verify Determinism
+
+on:
+  pull_request:
+    paths:
+      - "Dockerfile"
+      - "Gemfile.lock"
+      - "config/importmap.rb"
+      - "vendor/javascript/**"
+      - "app/assets/**"
+      - "bin/verify-deterministic-build"
+
+jobs:
+  determinism-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run double-build verification
+        run: bin/verify-deterministic-build
