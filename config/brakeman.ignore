@@ -1,0 +1,10 @@
+{
+  "ignored_warnings": [
+    {
+      "fingerprint": "2f0d4fd13441c3c2aaf09a135ed7c70381b4f96bdaed3d700376757eaabe51e2",
+      "note": "False positive: Open3.capture3 with array form does not invoke a shell. Values come from server config, not user input."
+    }
+  ],
+  "updated": "2026-05-15",
+  "brakeman_version": "8.0.4"
+}
