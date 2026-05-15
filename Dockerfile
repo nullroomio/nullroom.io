@@ -7,9 +7,9 @@
 
 # For a containerized dev environment, see Dev Containers: https://guides.rubyonrails.org/getting_started_with_devcontainer.html
 
-# Make sure RUBY_VERSION matches the Ruby version in .ruby-version
-ARG RUBY_VERSION=4.0.1
-FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
+# Pinned by digest (linux/amd64) for deterministic builds.
+# To update: docker pull --platform linux/amd64 ruby:<version>-slim && docker inspect --format='{{index .RepoDigests 0}}' ruby:<version>-slim
+FROM docker.io/library/ruby:4.0.1-slim@sha256:939bb2710ba0a49ffdba9470b4e562c9dfc5ee6718ba5a5214f1d421d0414d29 AS base
 
 # Rails app lives here
 WORKDIR /rails
@@ -29,6 +29,11 @@ ENV RAILS_ENV="production" \
 
 # Throw-away build stage to reduce size of final image
 FROM base AS build
+
+# Deterministic builds: fix all timestamps to a known epoch so that
+# asset fingerprints, gzip headers, and tar metadata are reproducible.
+ARG SOURCE_DATE_EPOCH=1715712000
+ENV SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH}
 
 # Install packages needed to build gems
 RUN apt-get update -qq && \
