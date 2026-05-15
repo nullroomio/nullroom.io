@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Verify Deterministic Build
+# Runs two independent Docker builds and compares their asset manifests.
+# Exit 0 = deterministic, Exit 1 = divergence detected.
+
+IMAGE_A="nullroom-verify-a"
+IMAGE_B="nullroom-verify-b"
+TMPDIR=$(mktemp -d)
+trap 'rm -rf "$TMPDIR"; docker rm -f "$IMAGE_A-ctr" "$IMAGE_B-ctr" 2>/dev/null; docker rmi -f "$IMAGE_A" "$IMAGE_B" 2>/dev/null' EXIT
+
+echo "==> Build A (--no-cache)..."
+docker build --no-cache --platform linux/amd64 -t "$IMAGE_A" .
+
+echo ""
+echo "==> Build B (--no-cache)..."
+docker build --no-cache --platform linux/amd64 -t "$IMAGE_B" .
+
+echo ""
+echo "==> Extracting manifests..."
+docker create --name "$IMAGE_A-ctr" "$IMAGE_A" true
+docker create --name "$IMAGE_B-ctr" "$IMAGE_B" true
+
+docker cp "$IMAGE_A-ctr:/rails/public/assets/.manifest.json" "$TMPDIR/manifest-a.json"
+docker cp "$IMAGE_B-ctr:/rails/public/assets/.manifest.json" "$TMPDIR/manifest-b.json"
+
+echo ""
+echo "==> Comparing .manifest.json..."
+if diff "$TMPDIR/manifest-a.json" "$TMPDIR/manifest-b.json" > /dev/null 2>&1; then
+  echo "✓ PASS: Asset manifests are identical. Build is deterministic."
+else
+  echo "✗ FAIL: Asset manifests differ!"
+  diff "$TMPDIR/manifest-a.json" "$TMPDIR/manifest-b.json" || true
+  exit 1
+fi
+
+# Optional: compare full asset tree checksums
+echo ""
+echo "==> Comparing full asset tree (SHA256)..."
+docker cp "$IMAGE_A-ctr:/rails/public/assets/" "$TMPDIR/assets-a/"
+docker cp "$IMAGE_B-ctr:/rails/public/assets/" "$TMPDIR/assets-b/"
+
+(cd "$TMPDIR/assets-a" && find . -type f | sort | xargs sha256sum) > "$TMPDIR/sums-a.txt"
+(cd "$TMPDIR/assets-b" && find . -type f | sort | xargs sha256sum) > "$TMPDIR/sums-b.txt"
+
+if diff "$TMPDIR/sums-a.txt" "$TMPDIR/sums-b.txt" > /dev/null 2>&1; then
+  echo "✓ PASS: All asset files are bit-for-bit identical."
+else
+  echo "✗ FAIL: Asset files differ!"
+  diff "$TMPDIR/sums-a.txt" "$TMPDIR/sums-b.txt" || true
+  exit 1
+fi
+
+echo ""
+echo "==> Done. Build is deterministic."
