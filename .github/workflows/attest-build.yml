@@ -1,0 +1,44 @@
+name: Attest Build
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  id-token: write
+  attestations: write
+  contents: read
+
+jobs:
+  attest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build production image
+        run: docker build --platform linux/amd64 -t nullroom-prod .
+
+      - name: Extract assets from image
+        run: |
+          docker create --name temp-ctr nullroom-prod true
+          docker cp temp-ctr:/rails/public/assets/ ./attested-assets/
+          docker rm temp-ctr
+
+      - name: Generate checksums
+        run: |
+          cd attested-assets
+          find . -type f | sort | xargs sha256sum > ../checksums.sha256
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: './checksums.sha256'
+
+      - name: Upload checksums artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: asset-checksums
+          path: ./checksums.sha256
