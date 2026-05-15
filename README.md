@@ -209,6 +209,10 @@ DESTROY_ROOM_ON_PEER_LEAVE = true
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
 
+## Roadmap
+
+See [ROADMAP.md](ROADMAP.md) for planned improvements.
+
 ## Security
 
 Please read our security policy and disclosure process in [SECURITY.md](SECURITY.md).
