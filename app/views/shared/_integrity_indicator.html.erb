@@ -1,0 +1,67 @@
+<%# ── Integrity Audit Indicator ──────────────────────────────────────── %>
+<%# Fixed bottom-left dot. Mirrors the sparkle at bottom-right.       %>
+<%# Zero network calls — all verification is DOM-only.                %>
+<div
+  data-controller="integrity"
+  class="fixed bottom-6 left-6 z-40"
+>
+  <%# Trigger dot %>
+  <button
+    data-action="integrity#toggle"
+    data-integrity-target="dot"
+    class="w-7 h-7 rounded-full border border-white/10 bg-white/5 backdrop-blur-md flex items-center justify-center cursor-pointer hover:border-white/25 transition-all group"
+    aria-label="Build integrity audit"
+    title="Build integrity audit"
+  >
+    <span
+      data-integrity-target="dotIcon"
+      class="w-2 h-2 rounded-full bg-secure-gray"
+    ></span>
+  </button>
+
+  <%# Expandable audit panel %>
+  <div
+    data-integrity-target="panel"
+    class="hidden absolute bottom-10 left-0 w-72 px-5 py-4 rounded-lg text-xs font-mono bg-null-deep border border-white/10 shadow-lg"
+  >
+    <div class="flex items-center justify-between mb-3">
+      <span class="text-[10px] font-semibold uppercase tracking-widest text-secure-gray">Integrity Audit</span>
+      <button data-action="integrity#toggle" class="text-secure-gray hover:text-trace-white transition-colors cursor-pointer" aria-label="Close">&times;</button>
+    </div>
+
+    <%# Module match status %>
+    <div class="flex items-center gap-2 mb-2">
+      <span data-integrity-target="statusIcon" class="text-secure-gray">&#9679;</span>
+      <span data-integrity-target="statusText" class="text-secure-gray">Checking&hellip;</span>
+    </div>
+
+    <%# Build SHA %>
+    <div class="flex items-center gap-2 mb-3 text-secure-gray">
+      <span>Build</span>
+      <code data-integrity-target="shaDisplay" class="text-trace-white"><%= commit_sha == "dev" ? "dev" : commit_sha[0..6] %></code>
+      <span>&middot;</span>
+      <% if commit_sha != "dev" %>
+        <a
+          href="https://github.com/nullroomio/nullroom.io/attestations?commit=<%= commit_sha %>"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-status-blue hover:text-status-blue-dark underline"
+        >Verify on GitHub</a>
+      <% else %>
+        <span class="text-secure-gray">dev mode</span>
+      <% end %>
+    </div>
+
+    <%# Honest disclaimer %>
+    <p class="text-[10px] leading-relaxed text-secure-gray/70 border-t border-white/8 pt-3">
+      This check compares data served by the same server.
+      For independent proof, verify the build SHA against our
+      <a
+        href="https://github.com/nullroomio/nullroom.io/attestations"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-status-blue hover:underline"
+      >GitHub Attestations</a>.
+    </p>
+  </div>
+</div>

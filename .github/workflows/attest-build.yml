@@ -19,7 +19,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build production image
-        run: docker build --platform linux/amd64 -t nullroom-prod .
+        run: docker build --platform linux/amd64 --build-arg COMMIT_SHA=${{ github.sha }} -t nullroom-prod .
 
       - name: Extract assets from image
         run: |

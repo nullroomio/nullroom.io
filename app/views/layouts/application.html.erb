@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html data-env="<%= Rails.env %>">
+<html data-env="<%= Rails.env %>" data-commit-sha="<%= commit_sha %>">
   <head>
     <title><%= content_for(:title) || "nullroom" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -23,11 +23,15 @@
     <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
+
+    <%# Propshaft asset manifest for client-side integrity verification %>
+    <script type="application/json" id="integrity-manifest"><%= integrity_manifest_json.html_safe %></script>
   </head>
 
   <body class="bg-null-deep font-sans antialiased">
     <main>
       <%= yield %>
     </main>
+    <%= render "shared/integrity_indicator" %>
   </body>
 </html>
