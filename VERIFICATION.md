@@ -102,3 +102,22 @@ The `checksums.sha256` file contains the SHA256 hash of every compiled asset (CS
 - The GitHub Actions workflow identity (not a human key that can be stolen)
 
 This creates a chain of trust: **source code → deterministic build → signed checksums → what your browser receives.**
+
+---
+
+## In-Browser Audit
+
+Every page includes a small integrity indicator in the bottom-left corner. Click the dot to see an audit panel showing:
+
+- **Module match count** — how many loaded JavaScript modules match the Propshaft asset manifest baked into the page at build time.
+- **Build SHA** — the commit hash of the deployed code, with a direct link to its GitHub Attestation.
+
+This check happens entirely in your browser with **zero network calls** — it compares the importmap (which tells your browser what to load) against the asset manifest (which records what the build produced). No data is sent to GitHub or any other server.
+
+### Limitations
+
+The audit is served by the same server that serves the app. If the server is compromised, it could serve a modified manifest that matches modified code — the local check would still show green.
+
+This is why the panel includes a direct link to GitHub Attestations. GitHub is an independent system the server operator cannot control. If the commit SHA in the panel doesn't match any attestation on GitHub, the code has been tampered with.
+
+**The dot is a canary. The GitHub link is the proof.**

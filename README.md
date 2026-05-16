@@ -93,7 +93,9 @@ Both keys auto-expire. When a peer disconnects, the other peer's UI is immediate
 
 nullroom is built deterministically. Every push to `main` produces a cryptographically signed attestation via GitHub Actions — proving the code you receive matches the code in this repository.
 
-Verify it yourself:
+**In-browser audit:** Look for the small dot in the bottom-left corner of any page. Click it to see how many loaded modules match the build manifest, along with a direct link to the GitHub Attestation for the running commit. This check uses zero network calls — it compares data already in your browser.
+
+**Independent verification** (CLI):
 
 ```bash
 gh run download --repo nullroomio/nullroom.io -n asset-checksums
