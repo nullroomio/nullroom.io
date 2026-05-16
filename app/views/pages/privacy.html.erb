@@ -1,3 +1,6 @@
+<% content_for :title, "Privacy Policy | Nullroom" %>
+<% content_for :description, "Nullroom's Zero-Knowledge Privacy Architecture. Discover how peer-to-peer ephemeral messaging works with zero accounts, zero logs, and zero tracking." %>
+
 <%# ── Privacy / FAQ ────────────────────────────────────────────────── %>
 <div class="w-full min-h-screen">
 
@@ -12,21 +15,13 @@
 
     <%# Section jump nav %>
     <nav class="flex gap-5 mb-6 pb-4 border-b border-white/8" aria-label="Page sections">
-      <a href="#privacy-policy" class="text-xs font-mono text-secure-gray hover:text-trace-white transition-colors tracking-wide uppercase">Privacy</a>
-      <a href="#target-audience" class="text-xs font-mono text-secure-gray hover:text-trace-white transition-colors tracking-wide uppercase">Audience</a>
-      <a href="#faq" class="text-xs font-mono text-secure-gray hover:text-trace-white transition-colors tracking-wide uppercase">FAQ</a>
+      <a href="<%= privacy_page_path %>" class="text-xs font-mono text-trace-white transition-colors tracking-wide uppercase">Privacy</a>
+      <a href="<%= about_page_path %>" class="text-xs font-mono text-secure-gray hover:text-trace-white transition-colors tracking-wide uppercase">About</a>
+      <a href="<%= use_cases_page_path %>" class="text-xs font-mono text-secure-gray hover:text-trace-white transition-colors tracking-wide uppercase">Use Cases</a>
+      <a href="<%= faq_page_path %>" class="text-xs font-mono text-secure-gray hover:text-trace-white transition-colors tracking-wide uppercase">FAQ</a>
     </nav>
 
-    <%# Philosophy badge %>
-    <div class="mb-8 glass px-5 py-4 border-l-4 border-status-blue">
-      <p class="text-sm text-trace-white leading-relaxed">
-        Our architecture is <strong class="font-semibold text-white">Zero-Knowledge</strong> - we do not have the technical capability to access your conversations.
-      </p>
-    </div>
-
-    <%# ── Privacy Policy ─────────────────────────────────────────────── %>
-    <section id="privacy-policy" class="mb-12">
-      <h2 class="text-xl font-semibold text-trace-white mb-6 pt-6 border-t border-white/8">Privacy Policy</h2>
+    <h1 class="text-3xl font-semibold mb-6 mt-8">Privacy Policy</h1>
       <div class="space-y-6">
         <div>
           <h3 class="text-sm font-semibold text-trace-white mb-3">Our Privacy Philosophy</h3>
@@ -115,131 +110,7 @@
       </div>
     </section>
 
-    <%# ── Target Audience ─────────────────────────────────────────────── %>
-    <section id="target-audience" class="mb-12">
-      <h2 class="text-xl font-semibold text-trace-white mb-6 pt-6 border-t border-white/8">Target Audience</h2>
-      <div class="space-y-3">
-
-        <div class="glass px-5 py-4">
-          <h3 class="text-sm font-semibold text-trace-white mb-1">Developers &amp; IT Teams</h3>
-          <p class="text-sm text-secure-gray leading-relaxed">Perfect for sharing production secrets—like <strong>database credentials, .env files, or SSH keys</strong>—that should never, ever be copy-pasted into a permanent Slack history or email thread.</p>
-        </div>
-
-        <div class="glass px-5 py-4">
-          <h3 class="text-sm font-semibold text-trace-white mb-1">Journalists &amp; High-Risk Travelers</h3>
-          <p class="text-sm text-secure-gray leading-relaxed">Ideal for high-stakes contact or border crossings where <strong>the mere presence of an installed privacy app is a liability</strong>. Since nullroom runs entirely in the browser and vanishes on tab-close, it leaves no icon or data footprint behind on a seized device.</p>
-        </div>
-
-        <div class="glass px-5 py-4">
-          <h3 class="text-sm font-semibold text-trace-white mb-1">Lawyers &amp; Legal Counsel</h3>
-          <p class="text-sm text-secure-gray leading-relaxed">Enables highly sensitive intial consultations and <strong>attorney-client privilege protection</strong> without generating metadata records across corporate email servers or telecom providers.</p>
-        </div>
-
-        <div class="glass px-5 py-4">
-          <h3 class="text-sm font-semibold text-trace-white mb-1">One-Time Collaborators &amp; Contractors</h3>
-          <p class="text-sm text-secure-gray leading-relaxed">Great for cross-company teams or freelancers who need to coordinate quickly and share sensitive assets <strong>without provisioning accounts or joining a shared workspace</strong>.</p>
-        </div>
-
-        <div class="glass px-5 py-4">
-          <h3 class="text-sm font-semibold text-trace-white mb-1">Privacy-Conscious Individuals</h3>
-          <p class="text-sm text-secure-gray leading-relaxed">Useful for those wanting to avoid "Chat Control" or corporate AI training scrapes. Provides a "blind" space for conversations that <strong>aren't tied directly to your legal identity</strong> via a phone number or email address.</p>
-        </div>
-
-      </div>
-    </section>
-
-    <%# ── FAQ ─────────────────────────────────────────────────────────── %>
-    <section id="faq" class="mb-12">
-      <h2 class="text-xl font-semibold text-trace-white mb-6 pt-6 border-t border-white/8">FAQ</h2>
-      <div class="space-y-2">
-
-        <details class="glass px-5 py-4 cursor-pointer group">
-          <summary class="text-sm font-semibold text-trace-white group-hover:text-status-blue transition-colors list-none">Why nullroom over other encrypted messaging apps?</summary>
-          <p class="text-sm text-secure-gray mt-3 leading-relaxed"><span class="text-trace-white font-medium">Traditional Apps:</span> Require you to install an app, verify a phone number, and create an account. You become a permanent contact in someone's database - even if you only wanted a one-time conversation.<br><br><span class="text-trace-white font-medium">nullroom.io:</span> No app, no sign-up, no phone number, no account. Just click "Create Secure Room", share a URL, and chat. <strong>The moment you close the tab, everything vanishes.</strong></p>
-        </details>
-
-        <details class="glass px-5 py-4 cursor-pointer group">
-          <summary class="text-sm font-semibold text-trace-white group-hover:text-status-blue transition-colors list-none">What is "Zero-Trace" messaging?</summary>
-          <p class="text-sm text-secure-gray mt-3 leading-relaxed">Most messaging apps store your history on their servers, even if it's encrypted. nullroom.io is designed to leave no trace:</p>
-          <ul class="mt-2 space-y-1 text-sm text-secure-gray list-disc list-inside">
-            <li><span class="text-trace-white font-medium">No Accounts:</span> We don't ask for your <strong>name, email, or phone number</strong>.</li>
-            <li><span class="text-trace-white font-medium">No Logs:</span> Our servers are configured to <strong>ignore connection details</strong>.</li>
-            <li><span class="text-trace-white font-medium">No Persistence:</span> Messages live <strong>only in your browser's temporary memory</strong>.</li>
-          </ul>
-        </details>
-
-        <details class="glass px-5 py-4 cursor-pointer group">
-          <summary class="text-sm font-semibold text-trace-white group-hover:text-status-blue transition-colors list-none">How does the security work?</summary>
-          <ol class="mt-3 space-y-1 text-sm text-secure-gray list-decimal list-inside">
-            <li><span class="text-trace-white font-medium">WebRTC (Peer-to-Peer):</span> Your device talks directly to your peer's device - <strong>messages bypass our servers</strong>.</li>
-            <li><span class="text-trace-white font-medium">Post-Quantum Key Exchange:</span> Once the direct connection opens, both peers perform an ML-KEM-768 key exchange to establish a <strong>quantum-resistant shared secret</strong>.</li>
-            <li><span class="text-trace-white font-medium">Hybrid Key Derivation:</span> The quantum secret is fused with the classical URL key via HKDF-SHA-256, producing a hybrid session key that is <strong>secure against both classical and quantum attacks</strong>.</li>
-            <li><span class="text-trace-white font-medium">Web Crypto API:</span> Every message is encrypted with the hybrid key using AES-GCM 256-bit <strong>before leaving your device (E2EE)</strong>.</li>
-          </ol>
-        </details>
-
-        <details class="glass px-5 py-4 cursor-pointer group">
-          <summary class="text-sm font-semibold text-trace-white group-hover:text-status-blue transition-colors list-none">If you don't have the keys, who does?</summary>
-          <p class="text-sm text-secure-gray mt-3 leading-relaxed">Only you and your peer. The initial key is appended to the URL after the <code class="font-mono text-xs text-status-blue">#</code> symbol (never sent to the server). Once connected, a second quantum-resistant secret is negotiated directly between your browsers and fused with the URL key to produce the final hybrid session key. Neither secret alone is sufficient - an attacker would need both. <strong>Because the URL fragment never leaves your device, it is mathematically impossible for us (or anyone compromising our servers) to decrypt your chat.</strong></p>
-        </details>
-
-        <details class="glass px-5 py-4 cursor-pointer group">
-          <summary class="text-sm font-semibold text-trace-white group-hover:text-status-blue transition-colors list-none">What is post-quantum encryption and why does it matter?</summary>
-          <p class="text-sm text-secure-gray mt-3 leading-relaxed">Future quantum computers could break today's key-exchange algorithms (like ECDH), allowing adversaries who record encrypted traffic now to decrypt it later. nullroom uses <span class="text-trace-white font-medium">ML-KEM-768</span> (NIST FIPS 203, Security Level 3) - a lattice-based key encapsulation mechanism designed to resist quantum attacks. By combining it with the classical key, <strong>your session is protected even if one layer is eventually compromised.</strong></p>
-        </details>
-
-        <details class="glass px-5 py-4 cursor-pointer group">
-          <summary class="text-sm font-semibold text-trace-white group-hover:text-status-blue transition-colors list-none">How long are rooms available?</summary>
-          <p class="text-sm text-secure-gray mt-3 leading-relaxed">Rooms expire after 15 minutes. Our Redis-backed self-destruct timer permanently purges the room access key. <strong>Once expired, the URL becomes permanently invalid for new connections.</strong></p>
-        </details>
-
-        <details class="glass px-5 py-4 cursor-pointer group">
-          <summary class="text-sm font-semibold text-trace-white group-hover:text-status-blue transition-colors list-none">How many users can chat in a room?</summary>
-          <p class="text-sm text-secure-gray mt-3 leading-relaxed">nullroom is optimised for private 1-on-1 conversations. Each room is limited to two participants - <strong>our backend enforces a "Room Capacity Lock" to prevent third parties from joining.</strong></p>
-        </details>
-
-        <details class="glass px-5 py-4 cursor-pointer group">
-          <summary class="text-sm font-semibold text-trace-white group-hover:text-status-blue transition-colors list-none">How do I invite someone to a secure room?</summary>
-          <p class="text-sm text-secure-gray mt-3 leading-relaxed">Because there are no accounts or contact lists, you must securely share the room access key with your peer. We provide three ways to do this:</p>
-          <ul class="mt-2 space-y-1 text-sm text-secure-gray list-disc list-inside">
-            <li><span class="text-trace-white font-medium">Direct Link:</span> Copy and paste the full secure URL via a trusted secondary channel.</li>
-            <li><span class="text-trace-white font-medium">QR Code:</span> If your peer is physically next to you, they can simply scan the on-screen QR code to join instantly without sending anything over the internet.</li>
-            <li><span class="text-trace-white font-medium">4-Word Phrase:</span> A temporary, easy-to-read phrase you can read over the phone or a voice call. This phrase acts as a one-time handshake to safely exchange the full encryption keys.</li>
-          </ul>
-        </details>
-
-        <details class="glass px-5 py-4 cursor-pointer group">
-          <summary class="text-sm font-semibold text-trace-white group-hover:text-status-blue transition-colors list-none">Can I access a room from multiple devices?</summary>
-          <p class="text-sm text-secure-gray mt-3 leading-relaxed">No. The encryption key is stored in your browser's URL fragment (<code class="font-mono text-xs text-status-blue">#</code>) - <strong>it never leaves your device.</strong> To maintain the Zero-Trace promise, <strong>the key is not synced to any cloud service.</strong></p>
-        </details>
-
-        <details class="glass px-5 py-4 cursor-pointer group">
-          <summary class="text-sm font-semibold text-trace-white group-hover:text-status-blue transition-colors list-none">Is Nullroom open source?</summary>
-          <p class="text-sm text-secure-gray mt-3 leading-relaxed">
-            Yes. We believe privacy tools must be fully transparent. <strong>Don't just trust our claims - read the code or audit the cryptography.</strong> The entire source code is available on GitHub:
-            <a href="https://github.com/nullroomio/nullroom.io" target="_blank" rel="noopener noreferrer" class="text-status-blue hover:text-status-blue-dark underline">https://github.com/nullroomio/nullroom.io</a>
-          </p>
-        </details>
-
-        <details class="glass px-5 py-4 cursor-pointer group">
-          <summary class="text-sm font-semibold text-trace-white group-hover:text-status-blue transition-colors list-none">How can I verify the code hasn't been tampered with?</summary>
-          <p class="text-sm text-secure-gray mt-3 leading-relaxed"><strong>Quick check:</strong> Look for the small dot in the bottom-left corner of any page. Click it to see an integrity audit — it shows how many loaded modules match the build manifest and links directly to the GitHub Attestation for the running commit. This check happens entirely in your browser with zero network calls.</p>
-          <p class="text-sm text-secure-gray mt-3 leading-relaxed"><strong>Independent verification:</strong> nullroom's Docker build is fully deterministic — the same source code always produces the same compiled output, byte for byte. Every push to <code class="font-mono text-xs text-status-blue">main</code> is cryptographically signed by GitHub Actions using <strong>Artifact Attestations</strong>, creating a tamper-proof receipt tied to the exact commit.</p>
-          <p class="text-sm text-secure-gray mt-3 leading-relaxed">Verify it yourself with two commands:</p>
-          <pre class="mt-3 text-xs font-mono text-status-blue bg-black/30 rounded px-4 py-3 overflow-x-auto"><code>gh run download --repo nullroomio/nullroom.io -n asset-checksums
-gh attestation verify asset-checksums/checksums.sha256 --repo nullroomio/nullroom.io</code></pre>
-          <p class="text-sm text-secure-gray mt-3 leading-relaxed text-secure-gray/70">Note: The in-app audit compares data served by the same server. For true independent proof, confirm the commit hash shown in the audit panel matches the attested commit on GitHub, or use the CLI commands above.</p>
-          <p class="text-sm text-secure-gray mt-3 leading-relaxed">
-            For the full technical details, see
-            <a href="https://github.com/nullroomio/nullroom.io/blob/main/VERIFICATION.md" target="_blank" rel="noopener noreferrer" class="text-status-blue hover:text-status-blue-dark underline">VERIFICATION.md</a>.
-          </p>
-        </details>
-
-      </div>
-    </section>
-
-    <%# Back to home %>
-    <div class="pt-8 border-t border-white/8">
+    <div class="pt-8 mt-8 border-t border-white/8 text-center text-sm font-mono">
       <%= link_to root_path, class: "inline-flex items-center gap-2 text-xs font-mono text-secure-gray hover:text-trace-white transition-colors" do %>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
         Back to Room Creator

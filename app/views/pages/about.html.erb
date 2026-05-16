@@ -1,0 +1,65 @@
+<% content_for :title, "About | Nullroom's Zero-Knowledge Philosophy" %>
+<% content_for :description, "Learn about Nullroom's architecture engineered to defeat Harvest Now, Decrypt Later (HNDL) attacks via peer-to-peer ephemerality." %>
+
+<div class="w-full min-h-screen">
+  <header class="flex items-center justify-between px-6 py-5 max-w-2xl mx-auto">
+    <%= render "shared/logo", size: "sm" %>
+    <span class="text-xs font-mono text-secure-gray tracking-wide">Zero-Knowledge Architecture</span>
+  </header>
+
+  <div class="max-w-2xl mx-auto px-6 pb-16 text-trace-white font-sans mt-8">
+    <nav class="flex gap-5 mb-6 pb-4 border-b border-white/8" aria-label="Page sections">
+      <a href="<%= privacy_page_path %>" class="text-xs font-mono text-secure-gray hover:text-trace-white transition-colors tracking-wide uppercase">Privacy</a>
+      <a href="<%= about_page_path %>" class="text-xs font-mono text-trace-white transition-colors tracking-wide uppercase">About</a>
+      <a href="<%= use_cases_page_path %>" class="text-xs font-mono text-secure-gray hover:text-trace-white transition-colors tracking-wide uppercase">Use Cases</a>
+      <a href="<%= faq_page_path %>" class="text-xs font-mono text-secure-gray hover:text-trace-white transition-colors tracking-wide uppercase">FAQ</a>
+    </nav>
+
+    <h1 class="text-3xl font-semibold mb-6">About & Philosophy</h1>
+
+    <div class="mb-8 glass px-5 py-4 border-l-4 border-status-blue">
+      <p class="text-sm text-trace-white leading-relaxed">
+        Our architecture is <strong class="font-semibold text-white">Zero-Knowledge</strong> - we do not have the technical capability to access your conversations.
+      </p>
+    </div>
+
+    <div class="space-y-6">
+      <div>
+        <h3 class="text-sm font-semibold text-trace-white mb-3">Our Privacy Philosophy</h3>
+        <p class="text-sm text-secure-gray leading-relaxed mb-4">
+          At nullroom.io, our mission is to provide a "volatile space" for conversation
+          without a digital footprint. We believe that privacy is not just about hiding data -
+          it is about the intentional non-existence of data. Everything is ephemeral.
+        </p>
+      </div>
+
+      <div>
+        <h3 class="text-sm font-semibold text-trace-white mb-3">Harvest Now, Decrypt Later (HNDL)</h3>
+        <p class="text-sm text-secure-gray leading-relaxed mb-4">
+          In the modern era of encrypted messaging, adversaries with long-term goals use storage capabilities to record encrypted traffic and wait until quantum computers are powerful enough to break traditional encryption ("Harvest Now, Decrypt Later").
+        </p>
+         <p class="text-sm text-secure-gray leading-relaxed mb-4">
+          Nullroom bypasses HNDL completely because <strong>there are no servers storing cipher-text</strong>. Because our encryption is peer-to-peer and runs entirely in memory until the tab is closed, there is mathematically zero data left behind to be harvested.
+        </p>
+      </div>
+
+      <div>
+        <h3 class="text-sm font-semibold text-trace-white mb-3">Open Source & Transparency</h3>
+        <p class="text-sm text-secure-gray leading-relaxed mb-4">
+          Yes, Nullroom is open source. We believe privacy tools must be fully transparent. <strong>Don't just trust our claims - read the code or audit the cryptography.</strong>
+        </p>
+        <p class="text-sm text-secure-gray leading-relaxed mb-4">
+          Our entire source code repository, along with verifiable build attestations to prove that what is running matches what is on Github, is openly available:
+          <a href="https://github.com/nullroomio/nullroom.io" target="_blank" rel="noopener noreferrer" class="text-status-blue hover:text-status-blue-dark underline block mt-2">github.com/nullroomio/nullroom.io</a>
+        </p>
+      </div>
+    </div>
+
+    <div class="pt-8 mt-8 border-t border-white/8 text-center text-sm font-mono">
+      <%= link_to root_path, class: "inline-flex items-center gap-2 text-xs font-mono text-secure-gray hover:text-trace-white transition-colors" do %>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Back to Room Creator
+      <% end %>
+    </div>
+  </div>
+</div>

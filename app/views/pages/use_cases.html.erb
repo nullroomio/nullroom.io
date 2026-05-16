@@ -1,0 +1,54 @@
+<% content_for :title, "Use Cases | Nullroom target audiences" %>
+<% content_for :description, "Secure credential sharing for IT, highly sensitive consultations for lawyers, and zero-footprint comms for journalists." %>
+
+<div class="w-full min-h-screen">
+  <header class="flex items-center justify-between px-6 py-5 max-w-2xl mx-auto">
+    <%= render "shared/logo", size: "sm" %>
+    <span class="text-xs font-mono text-secure-gray tracking-wide">Zero-Knowledge Architecture</span>
+  </header>
+
+  <div class="max-w-2xl mx-auto px-6 pb-16 text-trace-white font-sans mt-8">
+    <nav class="flex gap-5 mb-6 pb-4 border-b border-white/8" aria-label="Page sections">
+      <a href="<%= privacy_page_path %>" class="text-xs font-mono text-secure-gray hover:text-trace-white transition-colors tracking-wide uppercase">Privacy</a>
+      <a href="<%= about_page_path %>" class="text-xs font-mono text-secure-gray hover:text-trace-white transition-colors tracking-wide uppercase">About</a>
+      <a href="<%= use_cases_page_path %>" class="text-xs font-mono text-trace-white transition-colors tracking-wide uppercase">Use Cases</a>
+      <a href="<%= faq_page_path %>" class="text-xs font-mono text-secure-gray hover:text-trace-white transition-colors tracking-wide uppercase">FAQ</a>
+    </nav>
+
+    <h1 class="text-3xl font-semibold mb-6">Target Audience & Use Cases</h1>
+
+    <div class="space-y-3">
+      <div class="glass px-5 py-4">
+        <h3 class="text-sm font-semibold text-trace-white mb-1">Developers &amp; IT Teams</h3>
+        <p class="text-sm text-secure-gray leading-relaxed">Perfect for sharing production secrets—like <strong>database credentials, .env files, or SSH keys</strong>—that should never, ever be copy-pasted into a permanent Slack history or email thread.</p>
+      </div>
+
+      <div class="glass px-5 py-4">
+        <h3 class="text-sm font-semibold text-trace-white mb-1">Journalists &amp; High-Risk Travelers</h3>
+        <p class="text-sm text-secure-gray leading-relaxed">Ideal for high-stakes contact or border crossings where <strong>the mere presence of an installed privacy app is a liability</strong>. Since nullroom runs entirely in the browser and vanishes on tab-close, it leaves no icon or data footprint behind on a seized device.</p>
+      </div>
+
+      <div class="glass px-5 py-4">
+        <h3 class="text-sm font-semibold text-trace-white mb-1">Lawyers &amp; Legal Counsel</h3>
+        <p class="text-sm text-secure-gray leading-relaxed">Enables highly sensitive intial consultations and <strong>attorney-client privilege protection</strong> without generating metadata records across corporate email servers or telecom providers.</p>
+      </div>
+
+      <div class="glass px-5 py-4">
+        <h3 class="text-sm font-semibold text-trace-white mb-1">One-Time Collaborators &amp; Contractors</h3>
+        <p class="text-sm text-secure-gray leading-relaxed">Great for cross-company teams or freelancers who need to coordinate quickly and share sensitive assets <strong>without provisioning accounts or joining a shared workspace</strong>.</p>
+      </div>
+
+      <div class="glass px-5 py-4">
+        <h3 class="text-sm font-semibold text-trace-white mb-1">Privacy-Conscious Individuals</h3>
+        <p class="text-sm text-secure-gray leading-relaxed">Useful for those wanting to avoid "Chat Control" or corporate AI training scrapes. Provides a "blind" space for conversations that <strong>aren't tied directly to your legal identity</strong> via a phone number or email address.</p>
+      </div>
+    </div>
+
+    <div class="pt-8 mt-8 border-t border-white/8 text-center text-sm font-mono">
+      <%= link_to root_path, class: "inline-flex items-center gap-2 text-xs font-mono text-secure-gray hover:text-trace-white transition-colors" do %>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Back to Room Creator
+      <% end %>
+    </div>
+  </div>
+</div>

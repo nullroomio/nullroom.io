@@ -190,10 +190,14 @@
     </div>
 
     <%# Footer link %>
-    <div class="mt-8">
-      <%= link_to "Privacy Policy · FAQ", privacy_page_path,
-            class: "text-secure-gray hover:text-trace-white transition-colors text-xs font-mono",
-            rel: "noreferrer" %>
+    <div class="mt-8 flex items-center justify-center gap-4 text-xs font-mono">
+      <%= link_to "Privacy", privacy_page_path, class: "text-secure-gray hover:text-trace-white transition-colors", rel: "noreferrer" %>
+      <span class="text-white/10">·</span>
+      <%= link_to "FAQ", faq_page_path, class: "text-secure-gray hover:text-trace-white transition-colors", rel: "noreferrer" %>
+      <span class="text-white/10">·</span>
+      <%= link_to "Use Cases", use_cases_page_path, class: "text-secure-gray hover:text-trace-white transition-colors", rel: "noreferrer" %>
+      <span class="text-white/10">·</span>
+      <%= link_to "About", about_page_path, class: "text-secure-gray hover:text-trace-white transition-colors", rel: "noreferrer" %>
     </div>
   </section>
 

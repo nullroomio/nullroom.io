@@ -28,6 +28,9 @@ Rails.application.routes.draw do
 
   # Static pages
   get "privacy" => "pages#privacy", as: :privacy_page
+  get "faq" => "pages#faq", as: :faq_page
+  get "about" => "pages#about", as: :about_page
+  get "use-cases" => "pages#use_cases", as: :use_cases_page
 
   # ActionCable mount point for WebSocket connections
   mount ActionCable.server => "/cable"
