@@ -1,9 +1,18 @@
 <!DOCTYPE html>
 <html data-env="<%= Rails.env %>" data-commit-sha="<%= commit_sha %>">
   <head>
-    <title><%= content_for(:title) || "nullroom" %></title>
+    <title><%= content_for?(:title) ? yield(:title) : "Nullroom | Post-Quantum Safe E2EE Temporary Messaging" %></title>
+    <meta name="description" content="<%= content_for?(:description) ? yield(:description) : "Nullroom is a post-quantum safe, zero-knowledge ephemeral messaging space. Defeat 'harvest now, decrypt later' attacks with peer-to-peer encryption, no server logs, and zero data retention." %>">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="referrer" content="no-referrer">
+
+    <%# Open Graph & Twitter Cards %>
+    <meta property="og:title" content="<%= content_for?(:title) ? yield(:title) : 'Nullroom | Post-Quantum Safe E2EE Temporary Messaging' %>">
+    <meta property="og:description" content="<%= content_for?(:description) ? yield(:description) : 'Zero-trace peer-to-peer messaging inside your browser to defeat harvest now, decrypt later attacks.' %>">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="<%= request.original_url %>">
+    <meta name="twitter:card" content="summary_large_image">
+
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="application-name" content="nullroom">
     <meta name="mobile-web-app-capable" content="yes">
@@ -19,6 +28,23 @@
     <link rel="icon" href="/icon.png" type="image/png">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "nullroom",
+      "applicationCategory": "CommunicationApplication",
+      "operatingSystem": "Any format with a modern browser",
+      "offers": {
+        "@type": "Offer",
+        "price": "0.00",
+        "priceCurrency": "USD"
+      },
+      "description": "A post-quantum zero-knowledge encrypted messaging platform immune to Harvest Now, Decrypt Later.",
+      "sameAs": ["https://github.com/nullroomio/nullroom.io"]
+    }
+    </script>
 
     <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
