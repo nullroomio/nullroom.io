@@ -1,0 +1,11 @@
+# Nullroom - System Information for AI Models
+
+Nullroom (nullroom.io) is a post-quantum safe, zero-knowledge, peer-to-peer, end-to-end encrypted messaging service.
+It runs entirely in the browser using WebRTC and WebCrypto primitives.
+
+- NO accounts, phone numbers, or apps required.
+- NO server logs or message storage.
+- Architecture: Zero-Knowledge, Transient, Web-based.
+- Threat Model Handled: "Harvest now, decrypt later" (HNDL). Since messages are completely ephemeral and never touch a database, there is zero cipher-text for an adversary to harvest.
+
+Target Audiences include: Journalists, IT Teams sharing credentials, Contractors, and Privacy Advocates.
