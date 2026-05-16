@@ -43,6 +43,7 @@ builder:
   # Pass in additional build args needed for your Dockerfile.
   args:
     RUBY_VERSION: 4.0.1
+    COMMIT_SHA: <%= `git rev-parse HEAD`.strip %>
 
 # Inject ENV variables into containers (secrets come from .kamal/secrets).
 env:

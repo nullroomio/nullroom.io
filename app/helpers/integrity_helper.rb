@@ -17,6 +17,7 @@ module IntegrityHelper
 
   # Full 40-char commit SHA injected at deploy time, or "dev" locally.
   def commit_sha
-    ENV.fetch("COMMIT_SHA", "dev")
+    sha = ENV.fetch("COMMIT_SHA", "dev")
+    sha.blank? ? "dev" : sha
   end
 end
