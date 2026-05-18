@@ -122,3 +122,41 @@ describe("detectConnectionType", () => {
     assert.equal(detectConnectionType(map), "relay")
   })
 })
+
+// ─── Connection Type Exchange Convergence ────────────────────────────────────
+// When peers exchange their locally-detected connection type over the data channel,
+// the "worst" result wins: relay on either side means relay for both.
+// This mirrors the logic in room_controller.js handleControlMessage("connection_type").
+
+describe("connection type exchange convergence", () => {
+  // Simulates what handleControlMessage does when receiving a "connection_type" message
+  function converge(localType, remoteValue) {
+    if (remoteValue === "relay" && localType !== "relay") {
+      return "relay"
+    }
+    return localType
+  }
+
+  test("local direct + remote relay → upgrades to relay", () => {
+    // The real-world scenario: PC detects direct (can't see phone's TURN usage),
+    // but phone reports relay — PC must upgrade to relay.
+    assert.equal(converge("direct", "relay"), "relay")
+  })
+
+  test("local relay + remote direct → stays relay (no downgrade)", () => {
+    assert.equal(converge("relay", "direct"), "relay")
+  })
+
+  test("both direct → stays direct", () => {
+    assert.equal(converge("direct", "direct"), "direct")
+  })
+
+  test("both relay → stays relay", () => {
+    assert.equal(converge("relay", "relay"), "relay")
+  })
+
+  test("local undefined + remote relay → upgrades to relay", () => {
+    // Edge case: connectionType not yet set when exchange message arrives
+    assert.equal(converge(undefined, "relay"), "relay")
+  })
+})

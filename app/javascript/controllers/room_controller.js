@@ -147,6 +147,11 @@ export default class extends Controller {
         const remainingSeconds = Math.max(0, Math.floor((this.state.timerDuration - elapsed) / 1000))
         this.sendControlMessage({ type: "timer_sync", remaining_seconds: remainingSeconds })
       }
+      // Exchange connection type with remote peer so both sides converge.
+      // WebRTC getStats() only reliably reports relay on the local candidate;
+      // the remote peer's relay usage is invisible from our stats. By exchanging
+      // results, both peers display "relay" if either side detected it locally.
+      this.sendControlMessage({ type: "connection_type", value: this.state.connectionType || "direct" })
     })
 
     // Handle DataChannel open — detect connection type, then trigger PQ upgrade
@@ -392,6 +397,15 @@ export default class extends Controller {
       case "timer_sync":
         devLog("[Room] Received timer_sync:", msg.remaining_seconds, "seconds")
         this.resetTimer(msg.remaining_seconds)
+        break
+      case "connection_type":
+        // If remote peer detected relay locally, upgrade our display to relay.
+        // This ensures both peers agree: relay on either side means relay for both.
+        devLog("[Room] Remote peer connection type:", msg.value)
+        if (msg.value === "relay" && this.state.connectionType !== "relay") {
+          this.state.connectionType = "relay"
+          this.updateStatus("relay")
+        }
         break
       default:
         devLog("[Room] Unknown control message type:", msg.type)
