@@ -24,6 +24,10 @@ proxy:
     - www.nullroom.io
   # Proxy connects to your container on port 80 by default (Thruster serves on port 80).
   # app_port: 80
+  run:
+    # Bind proxy to primary IP only, leaving floating IP free for Coturn on port 443.
+    bind_ips:
+      - <%= ENV['KAMAL_WEB_IP'] %>
 
 # Credentials for your image host.
 # Using GitHub Container Registry (ghcr.io) - you can also use Docker Hub
@@ -56,6 +60,8 @@ env:
     LOG_REQUESTS: false
     # Donation minimum amount in piconero (0.004 XMR).
     NULLROOM_DONATION_AMOUNT_PICONERO: 4000000000
+    # Coturn host for health checks (floating IP, since Coturn runs with network:host).
+    COTURN_HOST: <%= ENV['KAMAL_COTURN_IP'] %>
   secret:
     - RAILS_MASTER_KEY
     - REDIS_URL
@@ -105,3 +111,21 @@ accessories:
       memory: 128m
       memory-swap: 128m
       cpus: "0.50"
+
+  # Coturn STUN/TURN server for WebRTC relay.
+  coturn:
+    image: coturn/coturn:4.6-alpine
+    host: <%= ENV['KAMAL_COTURN_IP'] %>
+    network: host
+    options:
+      user: "0:0"
+    volumes:
+      - /var/lib/coturn/certs:/var/lib/coturn/certs:ro
+    files:
+      - config/coturn/turnserver.conf:/etc/turnserver.conf
+    env:
+      clear:
+        EXTERNAL_IP: <%= ENV['KAMAL_COTURN_IP'] %>
+      secret:
+        - COTURN_SECRET
+    cmd: sh -c 'exec turnserver -c /etc/turnserver.conf --static-auth-secret="$COTURN_SECRET" --external-ip="$EXTERNAL_IP" --listening-ip="$EXTERNAL_IP"'
