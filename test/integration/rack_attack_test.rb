@@ -94,11 +94,11 @@ class RackAttackTest < ActionDispatch::IntegrationTest
       end
     end.new
 
-    original_new = CloudflareTurnService.method(:new)
-    CloudflareTurnService.singleton_class.define_method(:new) { fake_service }
+    original_new = CoturnService.method(:new)
+    CoturnService.singleton_class.define_method(:new) { fake_service }
     yield
   ensure
-    CloudflareTurnService.singleton_class.define_method(:new) do |*args, **kwargs, &block|
+    CoturnService.singleton_class.define_method(:new) do |*args, **kwargs, &block|
       original_new.call(*args, **kwargs, &block)
     end
   end

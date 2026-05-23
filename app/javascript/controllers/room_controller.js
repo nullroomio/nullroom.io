@@ -89,8 +89,7 @@ export default class extends Controller {
       // Preload ML-KEM library (runs in parallel with WebRTC negotiation)
       this.mlkemReady = import("mlkem").then(m => { m.init(); return m })
 
-      // Use provided ICE servers from data attribute (from Cloudflare)
-      // These are fetched server-side and never include Google STUN
+      // Use provided ICE servers from data attribute (server-generated TURN credentials)
       this.iceServers = this.turnServersValue && this.turnServersValue.length > 0
         ? this.turnServersValue
         : []

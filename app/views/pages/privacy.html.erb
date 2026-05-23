@@ -1,18 +1,14 @@
 <% content_for :title, "Privacy Policy | Nullroom" %>
 <% content_for :description, "Nullroom's Zero-Knowledge Privacy Architecture. Discover how peer-to-peer ephemeral messaging works with zero accounts, zero logs, and zero tracking." %>
-
 <%# ── Privacy / FAQ ────────────────────────────────────────────────── %>
 <div class="w-full min-h-screen">
-
   <%# ── Top nav ─────────────────────────────────────────────────────── %>
   <header class="flex items-center justify-between px-6 py-5 max-w-2xl mx-auto">
     <%= render "shared/logo", size: "sm" %>
     <span class="text-xs font-mono text-secure-gray tracking-wide">Zero-Knowledge Architecture</span>
   </header>
-
   <%# ── Content ─────────────────────────────────────────────────────── %>
   <div class="max-w-2xl mx-auto px-6 pb-16 text-trace-white font-sans">
-
     <%# Section jump nav %>
     <nav class="flex gap-5 mb-6 pb-4 border-b border-white/8" aria-label="Page sections">
       <a href="<%= privacy_page_path %>" class="text-xs font-mono text-trace-white transition-colors tracking-wide uppercase">Privacy</a>
@@ -20,102 +16,96 @@
       <a href="<%= use_cases_page_path %>" class="text-xs font-mono text-secure-gray hover:text-trace-white transition-colors tracking-wide uppercase">Use Cases</a>
       <a href="<%= faq_page_path %>" class="text-xs font-mono text-secure-gray hover:text-trace-white transition-colors tracking-wide uppercase">FAQ</a>
     </nav>
-
     <h1 class="text-3xl font-semibold mb-6 mt-8">Privacy Policy</h1>
-      <div class="space-y-6">
-        <div>
-          <h3 class="text-sm font-semibold text-trace-white mb-3">Our Privacy Philosophy</h3>
-          <p class="text-sm text-secure-gray leading-relaxed">
-            At nullroom.io, our mission is to provide a "volatile space" for conversation
-            without a digital footprint. We believe that privacy is not just about hiding data -
-            it is about the intentional non-existence of data.
-          </p>
-        </div>
-
-        <div>
-          <h3 class="text-sm font-semibold text-trace-white mb-3">Data We Do Not Collect</h3>
-          <dl class="space-y-2">
-            <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
-              <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">Personal Info</dt>
-              <dd class="text-sm text-secure-gray mt-1 sm:mt-0">No names, emails, phone numbers, or accounts are ever requested or stored.</dd>
-            </div>
-            <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
-              <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">Message Content</dt>
-              <dd class="text-sm text-secure-gray mt-1 sm:mt-0">Messages are sent directly between peers via WebRTC and never touch our servers in any format. They are fully end-to-end encrypted before leaving your device.</dd>
-            </div>
-            <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
-              <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">IP Addresses</dt>
-              <dd class="text-sm text-secure-gray mt-1 sm:mt-0">Server logging is entirely disabled in production. IP addresses are only briefly held in volatile memory to rate-limit and prevent abuse, but are never written to any persistent storage.</dd>
-            </div>
-            <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
-              <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">Cookies</dt>
-              <dd class="text-sm text-secure-gray mt-1 sm:mt-0">Zero tracking, analytics, or advertising cookies. A generic session cookie is used transiently only during the Monero donation flow and is cleared right after.</dd>
-            </div>
-          </dl>
-        </div>
-
-        <div>
-          <h3 class="text-sm font-semibold text-trace-white mb-3">Data We Process Temporarily</h3>
-          <dl class="space-y-2">
-            <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
-              <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">Room UUIDs</dt>
-              <dd class="text-sm text-secure-gray mt-1 sm:mt-0">Stored in volatile memory (Redis) and purged after 15 minutes to enforce session expiration.</dd>
-            </div>
-            <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
-              <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">Signaling Metadata</dt>
-              <dd class="text-sm text-secure-gray mt-1 sm:mt-0">For standard link sharing, encrypted connection details are instantly relayed via WebSockets without ever being saved. If you use the optional 4-word handshake phrase, the encrypted connection blob is stored in memory for up to 3 minutes and acts as a strict "one-time read" before being instantly deleted.</dd>
-            </div>
-          </dl>
-        </div>
-
-        <div>
-          <h3 class="text-sm font-semibold text-trace-white mb-3">Security Architecture</h3>
-          <dl class="space-y-2">
-            <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
-              <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">E2EE</dt>
-              <dd class="text-sm text-secure-gray mt-1 sm:mt-0">End-to-end encryption powered by the browser's Web Crypto API (AES-GCM 256-bit) with a post-quantum hybrid key exchange.</dd>
-            </div>
-            <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
-              <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">Post-Quantum</dt>
-              <dd class="text-sm text-secure-gray mt-1 sm:mt-0">ML-KEM-768 (NIST FIPS 203) key exchange runs automatically over the data channel. The quantum shared secret is fused with the classical URL key via HKDF-SHA-256, producing a hybrid session key resistant to "harvest now, decrypt later" attacks.</dd>
-            </div>
-            <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
-              <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">Peer-to-Peer</dt>
-              <dd class="text-sm text-secure-gray mt-1 sm:mt-0">Data travels directly between browsers via WebRTC - not through our servers.</dd>
-            </div>
-            <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
-              <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">Client-Side Keys</dt>
-              <dd class="text-sm text-secure-gray mt-1 sm:mt-0">The encryption key lives in the URL fragment (<code class="font-mono text-xs text-status-blue">#</code>), which browsers never send to the server. This classical key serves as one of two inputs to the hybrid derivation.</dd>
-            </div>
-            <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
-              <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">Mutual Confirmation</dt>
-              <dd class="text-sm text-secure-gray mt-1 sm:mt-0">Both peers verify role-specific HMAC confirmations before activating the hybrid key, preventing reflection and man-in-the-middle attacks on the key exchange.</dd>
-            </div>
-          </dl>
-        </div>
-
-        <div>
-          <h3 class="text-sm font-semibold text-trace-white mb-3">Third Parties</h3>
-          <dl class="space-y-2">
-            <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
-              <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">STUN/TURN Relays</dt>
-              <dd class="text-sm text-secure-gray mt-1 sm:mt-0">Cloudflare is used for NAT traversal. They see only routing metadata - never message content.</dd>
-            </div>
-            <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
-              <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">Payments</dt>
-              <dd class="text-sm text-secure-gray mt-1 sm:mt-0">Donation payments are processed anonymously via Monero. We use a "Blind Token" signature system to ensure that your payment identity is strictly decoupled from your chat sessions.</dd>
-            </div>
-          </dl>
-        </div>
+    <div class="space-y-6">
+      <div>
+        <h3 class="text-sm font-semibold text-trace-white mb-3">Our Privacy Philosophy</h3>
+        <p class="text-sm text-secure-gray leading-relaxed">
+          At nullroom.io, our mission is to provide a "volatile space" for conversation
+          without a digital footprint. We believe that privacy is not just about hiding data -
+          it is about the intentional non-existence of data.
+        </p>
       </div>
-    </section>
-
-    <div class="pt-8 mt-8 border-t border-white/8 text-center text-sm font-mono">
-      <%= link_to root_path, class: "inline-flex items-center gap-2 text-xs font-mono text-secure-gray hover:text-trace-white transition-colors" do %>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-        Back to Room Creator
-      <% end %>
+      <div>
+        <h3 class="text-sm font-semibold text-trace-white mb-3">Data We Do Not Collect</h3>
+        <dl class="space-y-2">
+          <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
+            <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">Personal Info</dt>
+            <dd class="text-sm text-secure-gray mt-1 sm:mt-0">No names, emails, phone numbers, or accounts are ever requested or stored.</dd>
+          </div>
+          <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
+            <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">Message Content</dt>
+            <dd class="text-sm text-secure-gray mt-1 sm:mt-0">Messages are sent directly between peers via WebRTC and never touch our servers in any format. They are fully end-to-end encrypted before leaving your device.</dd>
+          </div>
+          <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
+            <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">IP Addresses</dt>
+            <dd class="text-sm text-secure-gray mt-1 sm:mt-0">Server logging is entirely disabled in production. IP addresses are only briefly held in volatile memory to rate-limit and prevent abuse, but are never written to any persistent storage.</dd>
+          </div>
+          <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
+            <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">Cookies</dt>
+            <dd class="text-sm text-secure-gray mt-1 sm:mt-0">Zero tracking, analytics, or advertising cookies. A generic session cookie is used transiently only during the Monero donation flow and is cleared right after.</dd>
+          </div>
+        </dl>
+      </div>
+      <div>
+        <h3 class="text-sm font-semibold text-trace-white mb-3">Data We Process Temporarily</h3>
+        <dl class="space-y-2">
+          <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
+            <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">Room UUIDs</dt>
+            <dd class="text-sm text-secure-gray mt-1 sm:mt-0">Stored in volatile memory (Redis) and purged after 15 minutes to enforce session expiration.</dd>
+          </div>
+          <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
+            <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">Signaling Metadata</dt>
+            <dd class="text-sm text-secure-gray mt-1 sm:mt-0">For standard link sharing, encrypted connection details are instantly relayed via WebSockets without ever being saved. If you use the optional 4-word handshake phrase, the encrypted connection blob is stored in memory for up to 3 minutes and acts as a strict "one-time read" before being instantly deleted.</dd>
+          </div>
+        </dl>
+      </div>
+      <div>
+        <h3 class="text-sm font-semibold text-trace-white mb-3">Security Architecture</h3>
+        <dl class="space-y-2">
+          <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
+            <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">E2EE</dt>
+            <dd class="text-sm text-secure-gray mt-1 sm:mt-0">End-to-end encryption powered by the browser's Web Crypto API (AES-GCM 256-bit) with a post-quantum hybrid key exchange.</dd>
+          </div>
+          <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
+            <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">Post-Quantum</dt>
+            <dd class="text-sm text-secure-gray mt-1 sm:mt-0">ML-KEM-768 (NIST FIPS 203) key exchange runs automatically over the data channel. The quantum shared secret is fused with the classical URL key via HKDF-SHA-256, producing a hybrid session key resistant to "harvest now, decrypt later" attacks.</dd>
+          </div>
+          <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
+            <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">Peer-to-Peer</dt>
+            <dd class="text-sm text-secure-gray mt-1 sm:mt-0">Data travels directly between browsers via WebRTC - not through our servers.</dd>
+          </div>
+          <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
+            <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">Client-Side Keys</dt>
+            <dd class="text-sm text-secure-gray mt-1 sm:mt-0">The encryption key lives in the URL fragment (<code class="font-mono text-xs text-status-blue">#</code>), which browsers never send to the server. This classical key serves as one of two inputs to the hybrid derivation.</dd>
+          </div>
+          <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
+            <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">Mutual Confirmation</dt>
+            <dd class="text-sm text-secure-gray mt-1 sm:mt-0">Both peers verify role-specific HMAC confirmations before activating the hybrid key, preventing reflection and man-in-the-middle attacks on the key exchange.</dd>
+          </div>
+        </dl>
+      </div>
+      <div>
+        <h3 class="text-sm font-semibold text-trace-white mb-3">Third Parties</h3>
+        <dl class="space-y-2">
+          <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
+            <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">STUN/TURN Relays</dt>
+            <dd class="text-sm text-secure-gray mt-1 sm:mt-0">A self-hosted TURN server (coturn) is used for NAT traversal. Relay traffic is encrypted via TLS. No third party sees routing metadata.</dd>
+          </div>
+          <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
+            <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">Payments</dt>
+            <dd class="text-sm text-secure-gray mt-1 sm:mt-0">Donation payments are processed anonymously via Monero. We use a "Blind Token" signature system to ensure that your payment identity is strictly decoupled from your chat sessions.</dd>
+          </div>
+        </dl>
+      </div>
     </div>
-
-  </div><%# /content %>
+  </section>
+  <div class="pt-8 mt-8 border-t border-white/8 text-center text-sm font-mono">
+    <%= link_to root_path, class: "inline-flex items-center gap-2 text-xs font-mono text-secure-gray hover:text-trace-white transition-colors" do %>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Back to Room Creator
+    <% end %>
+  </div>
+</div>
+<%# /content %>
 </div>

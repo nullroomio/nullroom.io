@@ -40,5 +40,9 @@ module Nullroom
 
     # How long a successful donation unlock is kept in the browser session.
     DONATION_SESSION_UNLOCK_TTL_SECONDS = integer_env("NULLROOM_DONATION_SESSION_UNLOCK_TTL_SECONDS", 12 * 60 * 60)
+
+    # TURN provider: "coturn" (self-hosted) or "cloudflare" (API-based).
+    # Override with NULLROOM_TURN_PROVIDER in environment.
+    TURN_PROVIDER = ENV.fetch("NULLROOM_TURN_PROVIDER", "coturn").freeze
   end
 end

@@ -16,13 +16,12 @@ class RoomsController < ApplicationController
     # Initialize room counter (nobody joined yet)
     REDIS.setex("room:#{room_id}:count", Nullroom::Config::ROOM_COUNT_TTL_SECONDS, "0")
 
-    # Fetch ephemeral TURN credentials from Cloudflare
+    # Fetch ephemeral TURN credentials
     begin
-      service = CloudflareTurnService.new
+      service = turn_service
       turn_servers = service.generate_ice_servers
     rescue StandardError => e
-      Rails.logger.error("Failed to fetch Cloudflare TURN credentials: #{e.message}")
-      # Fallback to empty array - client should handle gracefully
+      Rails.logger.warn("TURN credential generation failed (#{Nullroom::Config::TURN_PROVIDER}): #{e.message}")
       turn_servers = []
     end
 
@@ -43,16 +42,25 @@ class RoomsController < ApplicationController
       return
     end
 
-    # Fetch ephemeral TURN credentials from Cloudflare
+    # Fetch ephemeral TURN credentials
     begin
-      service = CloudflareTurnService.new
+      service = turn_service
       @ice_servers = service.generate_ice_servers
     rescue StandardError => e
-      Rails.logger.error("Failed to fetch Cloudflare TURN credentials in show: #{e.message}")
-      # Fallback to empty array - client should handle gracefully
+      Rails.logger.warn("TURN credential generation failed (#{Nullroom::Config::TURN_PROVIDER}): #{e.message}")
       @ice_servers = []
     end
 
     # Room view is rendered; encryption key comes from URL fragment (never sent to server)
+  end
+
+  private
+
+  def turn_service
+    if Nullroom::Config::TURN_PROVIDER == "cloudflare"
+      CloudflareTurnService.new
+    else
+      CoturnService.new
+    end
   end
 end
