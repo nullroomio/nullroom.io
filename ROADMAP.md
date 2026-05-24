@@ -34,4 +34,4 @@ Quality-of-life upgrades for donors that don't compromise the zero-trace securit
 
 ## Infrastructure & Privacy
 
-- [ ] **Self-hosted STUN/TURN server** — Replace Cloudflare's STUN/TURN relay with a privately operated server to eliminate third-party visibility into connection metadata (IP pairs, session timing, bandwidth patterns). Removes the last external party that can observe routing-level information about room participants.
+- [x] **Self-hosted STUN/TURN server** — Replace Cloudflare's STUN/TURN relay with a privately operated server to eliminate third-party visibility into connection metadata (IP pairs, session timing, bandwidth patterns). Removes the last external party that can observe routing-level information about room participants.

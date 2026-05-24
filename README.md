@@ -163,7 +163,7 @@ When either peer closes the tab:
 | **QR Code Sharing** | In-person room joining without transmitting the key over the network |
 | **Anonymous Donations** | Monero (XMR) payments with RSA blind signatures — payment identity is cryptographically decoupled from chat sessions |
 | **Zero-Trace Termination** | Peer disconnect triggers immediate UI scrub + optional Redis room destruction |
-| **NAT Traversal** | Cloudflare TURN relay with short-lived credentials |
+| **NAT Traversal** | Self-hosted TURN relay (coturn) with short-lived HMAC credentials over TLS |
 | **2-Person Room Lock** | Server-enforced capacity — third connection attempts are rejected |
 | **No-Log Production** | Logger disabled, `no-referrer` policy, filtered parameters |
 | **CSP Hardened** | Per-request nonces, `frame-ancestors: none`, no `unsafe-inline` |
@@ -179,7 +179,7 @@ When either peer closes the tab:
 | Transport | WebRTC (RTCPeerConnection + DataChannel) |
 | Classical Crypto | Web Crypto API — AES-GCM-256, HKDF-SHA-256, HMAC-SHA-256, PBKDF2 |
 | Post-Quantum Crypto | ML-KEM-768 (NIST FIPS 203) |
-| NAT Traversal | Cloudflare TURN |
+| NAT Traversal | Self-hosted coturn (STUN + TURNS over TLS) |
 | Payments | Monero RPC + RSA blind signatures |
 | Database | SQLite (app metadata only — no chat data) |
 
