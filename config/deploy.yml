@@ -4,6 +4,10 @@ service: nullroom
 # Name of the container image.
 image: vdw/nullroom
 
+# Enforce zero log collection across all primary application structures at the daemon level.
+logging:
+  driver: none
+
 # Deploy to these servers.
 servers:
   web:
@@ -28,6 +32,8 @@ proxy:
     # Bind proxy to primary IP only, leaving floating IP free for Coturn on port 443.
     bind_ips:
       - <%= ENV['KAMAL_WEB_IP'] %>
+    # Mandatory override: stops Kamal from passing --log-opt flags that conflict with driver: none.
+    log_max_size: ""
 
 # Credentials for your image host.
 # Using GitHub Container Registry (ghcr.io) - you can also use Docker Hub
@@ -102,6 +108,9 @@ accessories:
     port: "127.0.0.1:6379:6379"
     directories:
       - data:/data
+    options:
+      log-driver: "none"
+    cmd: "redis-server --logfile /dev/null --loglevel warning"
 
   # Tor SOCKS proxy for outbound anonymized traffic.
   tor:
@@ -112,6 +121,7 @@ accessories:
       memory: 128m
       memory-swap: 128m
       cpus: "0.50"
+      log-driver: "none"
 
   # Coturn STUN/TURN server for WebRTC relay.
   coturn:
@@ -120,6 +130,7 @@ accessories:
     network: host
     options:
       user: "0:0"
+      log-driver: "none"
     volumes:
       - /var/lib/coturn/certs:/var/lib/coturn/certs:ro
     files:
@@ -129,4 +140,4 @@ accessories:
         EXTERNAL_IP: <%= ENV['KAMAL_COTURN_IP'] %>
       secret:
         - COTURN_SECRET
-    cmd: sh -c 'exec turnserver -c /etc/turnserver.conf --static-auth-secret="$COTURN_SECRET" --external-ip="$EXTERNAL_IP" --listening-ip="$EXTERNAL_IP"'
+    cmd: sh -c 'exec turnserver -c /etc/turnserver.conf --static-auth-secret="$COTURN_SECRET" --external-ip="$EXTERNAL_IP" --listening-ip="$EXTERNAL_IP" --log-file /dev/null --simple-log --no-stdout-log'
