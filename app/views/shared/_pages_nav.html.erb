@@ -1,0 +1,8 @@
+<%# Shared navigation for static pages. Pass `active:` as a symbol (:privacy, :about, :use_cases, :faq, :cli) %>
+<nav class="flex flex-wrap gap-5 mb-6 pb-4 border-b border-white/8" aria-label="Page sections">
+  <a href="<%= privacy_page_path %>" class="text-xs font-mono <%= active == :privacy ? 'text-trace-white' : 'text-secure-gray hover:text-trace-white' %> transition-colors tracking-wide uppercase">Privacy</a>
+  <a href="<%= about_page_path %>" class="text-xs font-mono <%= active == :about ? 'text-trace-white' : 'text-secure-gray hover:text-trace-white' %> transition-colors tracking-wide uppercase">About</a>
+  <a href="<%= use_cases_page_path %>" class="text-xs font-mono <%= active == :use_cases ? 'text-trace-white' : 'text-secure-gray hover:text-trace-white' %> transition-colors tracking-wide uppercase">Use Cases</a>
+  <a href="<%= faq_page_path %>" class="text-xs font-mono <%= active == :faq ? 'text-trace-white' : 'text-secure-gray hover:text-trace-white' %> transition-colors tracking-wide uppercase">FAQ</a>
+  <a href="<%= cli_page_path %>" class="text-xs font-mono <%= active == :cli ? 'text-trace-white' : 'text-secure-gray hover:text-trace-white' %> transition-colors tracking-wide uppercase">CLI</a>
+</nav>

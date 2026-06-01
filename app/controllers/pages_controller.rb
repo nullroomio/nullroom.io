@@ -14,4 +14,8 @@ class PagesController < ApplicationController
   def use_cases
     # Static page breaking down audience segments
   end
+
+  def cli
+    # Static page for the nullroom-cli terminal client
+  end
 end

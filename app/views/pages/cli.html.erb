@@ -1,0 +1,137 @@
+<% content_for :title, "CLI | Nullroom Terminal Client" %>
+<% content_for :description, "nullroom-cli: Post-quantum encrypted peer-to-peer messaging from your terminal. Single binary, zero accounts, fully interoperable with nullroom.io." %>
+
+<% content_for :head do %>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "nullroom-cli",
+  "applicationCategory": "SecurityApplication",
+  "operatingSystem": "Linux, macOS, Windows",
+  "description": "Post-quantum encrypted peer-to-peer messaging CLI. Single binary, zero accounts, fully interoperable with nullroom.io.",
+  "url": "https://nullroom.io/cli",
+  "downloadUrl": "https://github.com/nullroomio/nullroom-cli/releases",
+  "softwareVersion": "0.1.0",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+<% end %>
+
+<div class="w-full min-h-screen">
+  <header class="flex items-center justify-between px-6 py-5 max-w-2xl mx-auto">
+    <%= render "shared/logo", size: "sm" %>
+    <span class="text-xs font-mono text-secure-gray tracking-wide">Terminal Client</span>
+  </header>
+
+  <div class="max-w-2xl mx-auto px-6 pb-16 text-trace-white font-sans mt-8">
+    <%= render "shared/pages_nav", active: :cli %>
+
+    <h1 class="text-3xl font-semibold mb-6">nullroom-cli</h1>
+
+    <div class="mb-8 glass px-5 py-4 border-l-4 border-status-blue">
+      <p class="text-sm text-trace-white leading-relaxed">
+        Post-quantum encrypted messaging from your terminal. Same zero-knowledge philosophy as the web app — no accounts, no logs, no persistence — delivered as a <strong class="font-semibold text-white">single binary</strong>.
+      </p>
+    </div>
+
+    <div class="space-y-8">
+      <%# ── Key Features ─────────────────────────────────────────────── %>
+      <div>
+        <h3 class="text-sm font-semibold text-trace-white mb-3">Key Features</h3>
+        <div class="space-y-3">
+          <div class="glass px-5 py-4">
+            <h4 class="text-sm font-semibold text-trace-white mb-1">Post-Quantum Encryption</h4>
+            <p class="text-sm text-secure-gray leading-relaxed">AES-GCM-256 + ML-KEM-768 hybrid encryption. Resistant to both classical and quantum attacks.</p>
+          </div>
+          <div class="glass px-5 py-4">
+            <h4 class="text-sm font-semibold text-trace-white mb-1">Peer-to-Peer Transport</h4>
+            <p class="text-sm text-secure-gray leading-relaxed">Direct WebRTC connections when possible, encrypted TURN relay fallback on port 443/TCP when not.</p>
+          </div>
+          <div class="glass px-5 py-4">
+            <h4 class="text-sm font-semibold text-trace-white mb-1">Single Binary</h4>
+            <p class="text-sm text-secure-gray leading-relaxed">No runtime dependencies. Download and run. Available for Linux (x64/ARM64), macOS (x64/ARM64), and Windows (x64).</p>
+          </div>
+          <div class="glass px-5 py-4">
+            <h4 class="text-sm font-semibold text-trace-white mb-1">Agent-Friendly</h4>
+            <p class="text-sm text-secure-gray leading-relaxed">Pass <code class="text-xs bg-white/5 px-1.5 py-0.5 rounded">--json</code> for machine-readable output. Integrate secure messaging into scripts and automation.</p>
+          </div>
+          <div class="glass px-5 py-4">
+            <h4 class="text-sm font-semibold text-trace-white mb-1">File Transfer &amp; Pipe Mode</h4>
+            <p class="text-sm text-secure-gray leading-relaxed">Send files up to 16 MB end-to-end encrypted, or pipe stdin/stdout for tunnel-style workflows.</p>
+          </div>
+          <div class="glass px-5 py-4">
+            <h4 class="text-sm font-semibold text-trace-white mb-1">Web Interoperable</h4>
+            <p class="text-sm text-secure-gray leading-relaxed">Fully compatible with nullroom.io. Create a room from the terminal, join it from the browser — or vice versa.</p>
+          </div>
+        </div>
+      </div>
+
+      <%# ── Installation ─────────────────────────────────────────────── %>
+      <div>
+        <h3 class="text-sm font-semibold text-trace-white mb-3">Installation</h3>
+        <p class="text-sm text-secure-gray leading-relaxed mb-4">
+          Download the latest binary for your platform from
+          <a href="https://github.com/nullroomio/nullroom-cli/releases" class="text-status-blue hover:underline" target="_blank" rel="noopener noreferrer">GitHub Releases</a>.
+        </p>
+        <div class="glass px-5 py-4 font-mono text-xs text-secure-gray space-y-2">
+          <p class="text-trace-white mb-2"># Or build from source:</p>
+          <p>git clone https://github.com/nullroomio/nullroom-cli.git</p>
+          <p>cd nullroom-cli</p>
+          <p>bun install</p>
+          <p>bun run build <span class="text-secure-gray/60"># produces ./nr binary</span></p>
+        </div>
+      </div>
+
+      <%# ── Usage ────────────────────────────────────────────────────── %>
+      <div>
+        <h3 class="text-sm font-semibold text-trace-white mb-3">Quick Usage</h3>
+        <div class="glass px-5 py-4 font-mono text-xs space-y-3">
+          <div>
+            <p class="text-trace-white"># Create a secure room</p>
+            <p class="text-secure-gray">nr create</p>
+          </div>
+          <div>
+            <p class="text-trace-white"># Join with a room code</p>
+            <p class="text-secure-gray">nr join &lt;code&gt;</p>
+          </div>
+          <div>
+            <p class="text-trace-white"># Send a file (up to 16 MB)</p>
+            <p class="text-secure-gray">nr send secret.env</p>
+          </div>
+          <div>
+            <p class="text-trace-white"># Receive a file</p>
+            <p class="text-secure-gray">nr receive</p>
+          </div>
+          <div>
+            <p class="text-trace-white"># Pipe mode (stdin/stdout tunnel)</p>
+            <p class="text-secure-gray">echo "hello" | nr pipe</p>
+          </div>
+        </div>
+      </div>
+
+      <%# ── Source & Status ──────────────────────────────────────────── %>
+      <div>
+        <h3 class="text-sm font-semibold text-trace-white mb-3">Open Source</h3>
+        <p class="text-sm text-secure-gray leading-relaxed mb-4">
+          nullroom-cli is open source and available on GitHub. Current version: <strong class="font-semibold text-trace-white">0.1.0</strong> (early release).
+        </p>
+        <a href="https://github.com/nullroomio/nullroom-cli" class="inline-flex items-center gap-2 glass px-4 py-3 text-sm font-mono text-trace-white hover:border-status-blue/40 transition-colors" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+          nullroomio/nullroom-cli
+        </a>
+      </div>
+    </div>
+
+    <div class="pt-8 mt-8 border-t border-white/8 text-center text-sm font-mono">
+      <%= link_to root_path, class: "inline-flex items-center gap-2 text-xs font-mono text-secure-gray hover:text-trace-white transition-colors" do %>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Back to Room Creator
+      <% end %>
+    </div>
+  </div>
+</div>

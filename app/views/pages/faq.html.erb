@@ -51,12 +51,7 @@
   </header>
 
   <div class="max-w-2xl mx-auto px-6 pb-16 text-trace-white font-sans mt-8">
-    <nav class="flex gap-5 mb-6 pb-4 border-b border-white/8" aria-label="Page sections">
-      <a href="<%= privacy_page_path %>" class="text-xs font-mono text-secure-gray hover:text-trace-white transition-colors tracking-wide uppercase">Privacy</a>
-      <a href="<%= about_page_path %>" class="text-xs font-mono text-secure-gray hover:text-trace-white transition-colors tracking-wide uppercase">About</a>
-      <a href="<%= use_cases_page_path %>" class="text-xs font-mono text-secure-gray hover:text-trace-white transition-colors tracking-wide uppercase">Use Cases</a>
-      <a href="<%= faq_page_path %>" class="text-xs font-mono text-trace-white transition-colors tracking-wide uppercase">FAQ</a>
-    </nav>
+    <%= render "shared/pages_nav", active: :faq %>
 
     <h1 class="text-3xl font-semibold mb-6">Frequently Asked Questions</h1>
 
