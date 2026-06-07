@@ -28,10 +28,10 @@ function detectConnectionType(statsMap) {
     })
   }
 
-  if (!activePairId) return "direct"
+  if (!activePairId) return "relay"  // conservative: apply relay limit on stats failure
 
   const pair = statsMap.get(activePairId)
-  if (!pair) return "direct"
+  if (!pair) return "relay"  // conservative fallback
 
   const localCandidate = statsMap.get(pair.localCandidateId)
   const remoteCandidate = statsMap.get(pair.remoteCandidateId)
@@ -102,9 +102,9 @@ describe("detectConnectionType", () => {
     assert.equal(detectConnectionType(stats), "direct")
   })
 
-  test("no active pair → defaults to direct", () => {
+  test("no active pair → conservative relay fallback", () => {
     const map = new Map()
-    assert.equal(detectConnectionType(map), "direct")
+    assert.equal(detectConnectionType(map), "relay")
   })
 
   test("fallback to nominated candidate-pair when transport has no selectedCandidatePairId", () => {

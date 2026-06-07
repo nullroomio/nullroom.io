@@ -112,11 +112,11 @@ export class PeerConnection {
 
       if (!activePairId) {
         devLog("[PeerConnection] Could not determine active candidate pair")
-        return "direct"
+        return "relay"  // conservative fallback — apply relay limit on stats failure
       }
 
       const pair = stats.get(activePairId)
-      if (!pair) return "direct"
+      if (!pair) return "relay"  // conservative fallback
 
       const localCandidate = stats.get(pair.localCandidateId)
       const remoteCandidate = stats.get(pair.remoteCandidateId)

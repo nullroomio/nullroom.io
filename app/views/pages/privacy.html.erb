@@ -52,6 +52,10 @@
             <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">Signaling Metadata</dt>
             <dd class="text-sm text-secure-gray mt-1 sm:mt-0">For standard link sharing, encrypted connection details are instantly relayed via WebSockets without ever being saved. If you use the optional 4-word handshake phrase, the encrypted connection blob is stored in memory for up to 3 minutes and acts as a strict "one-time read" before being instantly deleted.</dd>
           </div>
+          <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
+            <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-40">File Transfer Gate</dt>
+            <dd class="text-sm text-secure-gray mt-1 sm:mt-0">When you send a file, the server briefly receives only its size to authorize the transfer against the applicable limit. It never sees the file name, your connection type, or the contents - the encrypted bytes travel peer-to-peer and are never logged.</dd>
+          </div>
         </dl>
       </div>
       <div>

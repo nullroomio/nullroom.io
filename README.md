@@ -139,7 +139,7 @@ Status transitions: `Signaling…` → `Upgrading…` → `Secure P2P`
 ### 4. Chat and transfer files
 
 - Every message is encrypted with the hybrid key (AES-GCM-256, random 12-byte IV per message) **before leaving the browser**.
-- File transfers run over a dedicated `nullroom-files` data channel with **per-chunk encryption** (64 KB chunks, backpressure control at 16 MB buffer). Default size limit: 16 MB.
+- File transfers run over a dedicated `nullroom-files` data channel with **per-chunk encryption** (64 KB chunks, backpressure control at 16 MB buffer). Size limits are connection-aware: **1 GB** for direct P2P, **100 MB** when relayed through TURN. The authorization gate sees only the file size — never the filename, connection type, or content.
 - Messages and files travel **directly between browsers** — the server is not in the data path.
 
 ### 5. Room termination
@@ -158,7 +158,7 @@ When either peer closes the tab:
 |---|---|
 | **E2EE Messaging** | AES-GCM-256 via Web Crypto API, per-message random IV |
 | **Post-Quantum Key Exchange** | ML-KEM-768 (NIST FIPS 203, Security Level 3) with hybrid HKDF derivation |
-| **P2P File Transfer** | Chunked, per-chunk encrypted, dedicated data channel, configurable size limit |
+| **P2P File Transfer** | Chunked, per-chunk encrypted, dedicated data channel; connection-aware limits (1 GB direct / 100 MB relay) |
 | **4-Word Handshake** | BIP-39 wordlist, PBKDF2 (100K iterations), one-time encrypted Redis blob (180s TTL) |
 | **QR Code Sharing** | In-person room joining without transmitting the key over the network |
 | **Anonymous Donations** | Monero (XMR) payments with RSA blind signatures — payment identity is cryptographically decoupled from chat sessions |
@@ -192,7 +192,8 @@ All settings live in [`config/initializers/nullroom.rb`](config/initializers/nul
 | Variable | Default | Description |
 |---|---|---|
 | `NULLROOM_ROOM_TTL_SECONDS` | `900` (15 min) | Room lifetime before auto-expiry |
-| `NULLROOM_FILE_TRANSFER_SIZE_LIMIT_BYTES` | `16777216` (16 MB) | Max P2P file transfer size |
+| `NULLROOM_FILE_TRANSFER_SIZE_LIMIT_RELAY_BYTES` | `104857600` (100 MB) | Max relayed (TURN) file transfer size |
+| `NULLROOM_FILE_TRANSFER_SIZE_LIMIT_DIRECT_BYTES` | `1073741824` (1 GB) | Max direct-P2P file transfer size |
 | `NULLROOM_DONATION_AMOUNT_PICONERO` | `4000000000` (0.004 XMR) | Donation amount for blind token |
 | `NULLROOM_DONATION_CONFIRMATIONS_REQUIRED` | `10` | Monero confirmations before signing |
 | `NULLROOM_DONATION_PAYMENT_SESSION_TTL_SECONDS` | `1800` (30 min) | Payment session lifetime |

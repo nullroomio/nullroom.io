@@ -26,6 +26,7 @@ export default class extends Controller {
     "fileProgress",
     "fileProgressBar",
     "fileProgressLabel",
+    "fileSizeLabel",
     // QR code
     "qrModal",
     "qrCanvas",
@@ -56,7 +57,9 @@ export default class extends Controller {
       // File transfer
       fileSharing: false,
       pendingFile: null,
-      fileSizeLimit: FILE_SIZE_LIMIT
+      fileSizeLimitRelay:  FILE_SIZE_LIMIT,  // overridden by server init
+      fileSizeLimitDirect: FILE_SIZE_LIMIT,  // overridden by server init
+      fileSizeLimit:       FILE_SIZE_LIMIT   // active limit — updated after connection type confirmed
     }
     this.sender   = null
     this.receiver = null
@@ -276,7 +279,10 @@ export default class extends Controller {
             // Store our connection ID and initialize peer
             this.state.connectionId = data.connection_id
             this.state.fileSharing  = data.file_sharing === true
-            this.state.fileSizeLimit = Number(data.file_size_limit) > 0 ? Number(data.file_size_limit) : FILE_SIZE_LIMIT
+            this.state.fileSizeLimitRelay  = Number(data.file_size_limit_relay)  || FILE_SIZE_LIMIT
+            this.state.fileSizeLimitDirect = Number(data.file_size_limit_direct) || FILE_SIZE_LIMIT
+            // Start conservative until connection type is confirmed
+            this.state.fileSizeLimit = this.state.fileSizeLimitRelay
             devLog("[Room] Received init event")
             if (data.initiator) {
               this.appendSystemLog("// INITIALIZING_NULLROOM_INSTANCE_V1.0...")
@@ -404,6 +410,7 @@ export default class extends Controller {
         if (msg.value === "relay" && this.state.connectionType !== "relay") {
           this.state.connectionType = "relay"
           this.updateStatus("relay")
+          this._updateFileSizeLimit()
         }
         break
       default:
@@ -808,7 +815,7 @@ export default class extends Controller {
 
   /**
    * Client-side size guard, then ask the server to authorise the transfer.
-   * Actual bytes travel P2P; the server only sees the metadata for the gate check.
+   * Actual bytes travel P2P; the server only sees the file size for the gate check.
    */
   _requestFileTransfer(file) {
     if (this.state.roomTerminated || !this.state.p2p) return
@@ -819,8 +826,11 @@ export default class extends Controller {
     // Store the file and ask the server gate
     this.state.pendingFile = file
     if (this.channel) {
+      // Zero-trace: the gate only needs the size. The filename never leaves the
+      // client, and the relay/direct split is enforced client-side (the guard above
+      // + _updateFileSizeLimit), so the server never learns the connection topology.
       this.channel.perform("initiate_file_transfer", {
-        metadata: { file_name: file.name, file_size: file.size }
+        metadata: { file_size: file.size }
       })
     }
   }
@@ -836,18 +846,46 @@ export default class extends Controller {
       (name, percent) => this.updateFileProgress(name, percent),
       (msg) => this.showError(msg)
     )
-    this.sender.setFileSizeLimit(this.state.fileSizeLimit)
 
     this.receiver = new FileTransferReceiver(
       decryptFn,
       (name, percent) => this.updateFileProgress(name, percent),
-      (file) => this.appendFileDownload(file)
+      (file) => this.appendFileDownload(file),
+      (name, sizeBytes) => this._warnLargeFile(name, sizeBytes),
+      (msg) => this.showError(msg)
     )
+
+    // Apply the correct limit for the confirmed connection type + update UI label
+    this._updateFileSizeLimit()
 
     // Reveal the file drop zone
     if (this.hasFileZoneTarget) {
       this.fileZoneTarget.classList.remove("hidden")
     }
+  }
+
+  /** Set the active file size limit based on connection type and propagate to sender/receiver/UI. */
+  _updateFileSizeLimit() {
+    const isDirect = this.state.connectionType === "direct"
+    this.state.fileSizeLimit = isDirect
+      ? this.state.fileSizeLimitDirect
+      : this.state.fileSizeLimitRelay
+
+    if (this.sender)   this.sender.setFileSizeLimit(this.state.fileSizeLimit)
+    if (this.receiver) this.receiver.setFileSizeLimit(this.state.fileSizeLimit)
+
+    if (this.hasFileSizeLabelTarget) {
+      this.fileSizeLabelTarget.textContent = `max ${this._fileSizeLimitLabel()}`
+    }
+  }
+
+  /** Warn the receiver when FSA streaming is unavailable for a large incoming file. */
+  _warnLargeFile(name, sizeBytes) {
+    const mb = Math.round(sizeBytes / (1024 * 1024))
+    this.appendSystemLog(
+      `[!!] LARGE_FILE_INCOMING: ${name} (${mb} MB) — buffering into memory. Ensure sufficient RAM.`,
+      "warn"
+    )
   }
 
   /** Update the progress bar and label. Hides the bar once transfer completes. */
@@ -959,7 +997,10 @@ export default class extends Controller {
   }
 
   _fileSizeLimitLabel() {
-    const mebibytes = this.state.fileSizeLimit / (1024 * 1024)
+    const bytes     = this.state.fileSizeLimit
+    const gibibytes = bytes / (1024 * 1024 * 1024)
+    if (gibibytes >= 1 && Number.isInteger(gibibytes)) return `${gibibytes} GB`
+    const mebibytes = bytes / (1024 * 1024)
     return Number.isInteger(mebibytes) ? `${mebibytes} MB` : `${mebibytes.toFixed(1)} MB`
   }
 

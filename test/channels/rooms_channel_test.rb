@@ -218,7 +218,7 @@ class RoomsChannelTest < ActionCable::Channel::TestCase
     end
   end
 
-  test "init message includes file_sharing flag set to true" do
+  test "init message includes file_sharing flag and both size limits" do
     room_id = "room-file-sharing"
     redis = InMemoryRedis.new(
       "room:#{room_id}" => "active",
@@ -233,10 +233,14 @@ class RoomsChannelTest < ActionCable::Channel::TestCase
       init_payload = transmissions.last.deep_symbolize_keys
       assert_equal "init", init_payload[:type]
       assert init_payload[:file_sharing], "expected file_sharing to be true in the init message"
+      assert_equal Nullroom::Config::FILE_TRANSFER_SIZE_LIMIT_RELAY_BYTES,  init_payload[:file_size_limit_relay]
+      assert_equal Nullroom::Config::FILE_TRANSFER_SIZE_LIMIT_DIRECT_BYTES, init_payload[:file_size_limit_direct]
+      assert_equal Nullroom::Config::FILE_TRANSFER_SIZE_LIMIT_RELAY_BYTES,  init_payload[:file_size_limit],
+                   "legacy file_size_limit key should match relay limit"
     end
   end
 
-  test "initiate_file_transfer authorises and transmits authorized for files within the 25 MB limit" do
+  test "initiate_file_transfer authorises transfers within the maximum ceiling" do
     room_id = "room-file-ok"
     redis = InMemoryRedis.new(
       "room:#{room_id}" => "active",
@@ -247,7 +251,68 @@ class RoomsChannelTest < ActionCable::Channel::TestCase
       subscribe room_id: room_id
       assert subscription.confirmed?
 
-      perform :initiate_file_transfer, { "metadata" => { "file_name" => "photo.jpg", "file_size" => 10_000_000 } }
+      perform :initiate_file_transfer, { "metadata" => { "file_size" => 10_000_000 } }
+
+      response = transmissions.last.deep_symbolize_keys
+      assert_equal "file_transfer_authorized", response[:type]
+    end
+  end
+
+  test "initiate_file_transfer authorises a large transfer up to the 1 GB ceiling" do
+    room_id = "room-file-direct"
+    redis = InMemoryRedis.new(
+      "room:#{room_id}" => "active",
+      "room:#{room_id}:count" => "0"
+    )
+
+    with_stubbed_redis(redis) do
+      subscribe room_id: room_id
+      assert subscription.confirmed?
+
+      # The gate enforces only the absolute ceiling; the client no longer sends
+      # connection_type (the relay/direct split is enforced client-side).
+      perform :initiate_file_transfer, { "metadata" => { "file_size" => 500_000_000 } }
+
+      response = transmissions.last.deep_symbolize_keys
+      assert_equal "file_transfer_authorized", response[:type]
+    end
+  end
+
+  test "initiate_file_transfer rejects transfers exceeding the 1 GB ceiling" do
+    room_id = "room-file-direct-too-large"
+    redis = InMemoryRedis.new(
+      "room:#{room_id}" => "active",
+      "room:#{room_id}:count" => "0"
+    )
+
+    with_stubbed_redis(redis) do
+      subscribe room_id: room_id
+      assert subscription.confirmed?
+
+      perform :initiate_file_transfer, {
+        "metadata" => { "file_size" => Nullroom::Config::FILE_TRANSFER_SIZE_LIMIT_DIRECT_BYTES + 1 }
+      }
+
+      response = transmissions.last.deep_symbolize_keys
+      assert_equal "file_transfer_error", response[:type]
+    end
+  end
+
+  # The 100 MB relay cap is now enforced client-side (so the server never learns the
+  # connection type). A 110 MB transfer therefore passes the server gate — on a relay
+  # connection the client blocks it before it ever reaches here.
+  test "initiate_file_transfer no longer rejects 110 MB at the server gate" do
+    room_id = "room-file-explicit-relay"
+    redis = InMemoryRedis.new(
+      "room:#{room_id}" => "active",
+      "room:#{room_id}:count" => "0"
+    )
+
+    with_stubbed_redis(redis) do
+      subscribe room_id: room_id
+      assert subscription.confirmed?
+
+      perform :initiate_file_transfer, { "metadata" => { "file_size" => 110_000_000 } }
 
       response = transmissions.last.deep_symbolize_keys
       assert_equal "file_transfer_authorized", response[:type]
@@ -277,7 +342,7 @@ class RoomsChannelTest < ActionCable::Channel::TestCase
     end
   end
 
-  test "initiate_file_transfer rejects and transmits error for files exceeding the 25 MB limit" do
+  test "initiate_file_transfer rejection message references the 1 GB maximum" do
     room_id = "room-file-too-large"
     redis = InMemoryRedis.new(
       "room:#{room_id}" => "active",
@@ -288,11 +353,13 @@ class RoomsChannelTest < ActionCable::Channel::TestCase
       subscribe room_id: room_id
       assert subscription.confirmed?
 
-      perform :initiate_file_transfer, { "metadata" => { "file_name" => "huge.zip", "file_size" => 30_000_000 } }
+      perform :initiate_file_transfer, {
+        "metadata" => { "file_size" => Nullroom::Config::FILE_TRANSFER_SIZE_LIMIT_DIRECT_BYTES + 1 }
+      }
 
       response = transmissions.last.deep_symbolize_keys
       assert_equal "file_transfer_error", response[:type]
-      assert_includes response[:error], "16 MB"
+      assert_includes response[:error], "1 GB"
     end
   end
 
@@ -307,16 +374,18 @@ class RoomsChannelTest < ActionCable::Channel::TestCase
       subscribe room_id: room_id
       assert subscription.confirmed?
 
+      # A malicious client can still place a filename in the metadata even though the
+      # honest client no longer sends one — the server must never echo it back.
       perform :initiate_file_transfer, {
         "metadata" => {
           "file_name" => XSS_POLYGLOT_PAYLOAD,
-          "file_size" => Nullroom::Config::FILE_TRANSFER_SIZE_LIMIT_BYTES + 1
+          "file_size" => Nullroom::Config::FILE_TRANSFER_SIZE_LIMIT_DIRECT_BYTES + 1
         }
       }
 
       response = transmissions.last.deep_symbolize_keys
       assert_equal "file_transfer_error", response[:type]
-      assert_includes response[:error], "Beta limit exceeded"
+      assert_includes response[:error], "1 GB"
       refute_includes response[:error], XSS_POLYGLOT_PAYLOAD
     end
   end

@@ -21,9 +21,16 @@ module Nullroom
     # When false: room remains active until TTL expires (peers can reconnect via back/history)
     DESTROY_ROOM_ON_PEER_LEAVE = false
 
-    # Maximum P2P file transfer size in bytes.
-    # Override with NULLROOM_FILE_TRANSFER_SIZE_LIMIT_BYTES in environment.
-    FILE_TRANSFER_SIZE_LIMIT_BYTES = integer_env("NULLROOM_FILE_TRANSFER_SIZE_LIMIT_BYTES", 16 * 1024 * 1024)
+    # Maximum P2P file transfer size in bytes (relay path — protects TURN bandwidth).
+    # Override with NULLROOM_FILE_TRANSFER_SIZE_LIMIT_RELAY_BYTES in environment.
+    FILE_TRANSFER_SIZE_LIMIT_RELAY_BYTES = integer_env("NULLROOM_FILE_TRANSFER_SIZE_LIMIT_RELAY_BYTES", 100 * 1024 * 1024)
+
+    # Maximum P2P file transfer size for direct connections (data never touches the server).
+    # Override with NULLROOM_FILE_TRANSFER_SIZE_LIMIT_DIRECT_BYTES in environment.
+    FILE_TRANSFER_SIZE_LIMIT_DIRECT_BYTES = integer_env("NULLROOM_FILE_TRANSFER_SIZE_LIMIT_DIRECT_BYTES", 1 * 1024 * 1024 * 1024)
+
+    # Legacy alias — kept so any external tooling referencing this constant still works.
+    FILE_TRANSFER_SIZE_LIMIT_BYTES = FILE_TRANSFER_SIZE_LIMIT_RELAY_BYTES
 
     # Donation amount in piconero (1e-12 XMR).
     # Default: 0.004 XMR.

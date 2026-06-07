@@ -164,7 +164,7 @@
         <%= render "shared/icon", name: "paperclip", css: "w-4 h-4 shrink-0" %>
         <span class="text-xs font-mono">
           Drop a file or click to select
-          <span class="text-white/30">(max <%= file_transfer_size_limit_label %>)</span>
+          <span data-room-target="fileSizeLabel" class="text-white/30"></span>
         </span>
         <%# Invisible native file picker layered over the styled div %>
         <input

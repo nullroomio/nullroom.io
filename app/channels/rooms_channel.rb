@@ -33,7 +33,9 @@ class RoomsChannel < ApplicationCable::Channel
       initiator: count == 1,
       connection_id: @connection_id,
       file_sharing: true,
-      file_size_limit: Nullroom::Config::FILE_TRANSFER_SIZE_LIMIT_BYTES
+      file_size_limit:        Nullroom::Config::FILE_TRANSFER_SIZE_LIMIT_RELAY_BYTES,
+      file_size_limit_relay:  Nullroom::Config::FILE_TRANSFER_SIZE_LIMIT_RELAY_BYTES,
+      file_size_limit_direct: Nullroom::Config::FILE_TRANSFER_SIZE_LIMIT_DIRECT_BYTES
     })
 
     # If we're the second person, notify first person that we're ready
@@ -93,26 +95,29 @@ class RoomsChannel < ApplicationCable::Channel
       # Soft rejection — only the requesting sender receives this
       transmit({
         type: "file_transfer_error",
-        error: "Beta limit exceeded: Files must be under #{file_limit_label}."
+        error: "File too large. The maximum file size is #{max_limit_label}."
       })
     end
   end
 
   private
 
-  # Stubbed gate for the Beta phase.
-  # The structure is ready for Blind Token (JWT) enforcement in the Pro launch.
+  # The server only enforces the absolute ceiling (the direct limit). The relay/direct
+  # split is applied client-side, so the server never learns the connection topology
+  # (zero-trace). The relay cap is protected at Coturn via rate/concurrency quotas,
+  # where it cannot be spoofed by a client falsely claiming a "direct" connection.
   def authorized_for_file_transfer?(metadata)
-    # 1. Enforce the Beta size limit.
-    return false if metadata.to_h["file_size"].to_i > Nullroom::Config::FILE_TRANSFER_SIZE_LIMIT_BYTES
+    file_size = metadata.to_h["file_size"].to_i
 
-    # 2. TODO: Implement BlindSignatureService.verify?(token, sig) for Pro launch.
-    #    For now, all P2P file transfers are permitted during the Beta phase.
-    true
+    # TODO: Implement BlindSignatureService.verify?(token, sig) for Pro launch.
+    file_size <= Nullroom::Config::FILE_TRANSFER_SIZE_LIMIT_DIRECT_BYTES
   end
 
-  def file_limit_label
-    bytes = Nullroom::Config::FILE_TRANSFER_SIZE_LIMIT_BYTES
+  def max_limit_label
+    bytes = Nullroom::Config::FILE_TRANSFER_SIZE_LIMIT_DIRECT_BYTES
+    gibibytes = bytes / 1024.0 / 1024.0 / 1024.0
+    return "#{gibibytes.to_i} GB" if gibibytes >= 1 && gibibytes == gibibytes.floor
+
     mebibytes = bytes / 1024.0 / 1024.0
     mebibytes.round == mebibytes ? "#{mebibytes.to_i} MB" : "#{mebibytes.round(1)} MB"
   end
