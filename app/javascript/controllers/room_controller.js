@@ -875,7 +875,7 @@ export default class extends Controller {
     if (this.receiver) this.receiver.setFileSizeLimit(this.state.fileSizeLimit)
 
     if (this.hasFileSizeLabelTarget) {
-      this.fileSizeLabelTarget.textContent = `max ${this._fileSizeLimitLabel()}`
+      this.fileSizeLabelTarget.textContent = `Files up to ${this._fileSizeLimitLabel()}`
     }
   }
 
