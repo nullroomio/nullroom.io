@@ -5,6 +5,27 @@ import { generateKey } from "modules/encryption"
 export default class extends Controller {
   static targets = ["buttonText", "errorContainer", "errorMessage"]
 
+  connect() {
+    // The create-room button is disabled via JS and the redirect on success
+    // bypasses Turbo (raw window.location.assign), so bfcache can restore this
+    // page with the button still disabled after the user navigates back.
+    this.resetButton = this.resetButton.bind(this)
+    window.addEventListener("pageshow", this.resetButton)
+  }
+
+  disconnect() {
+    window.removeEventListener("pageshow", this.resetButton)
+  }
+
+  // Restore the button's idle state when the page is served from bfcache.
+  resetButton(event) {
+    if (!event.persisted) return
+
+    const button = this.element.querySelector('[data-action="landing#createRoom"]')
+    if (button) button.disabled = false
+    this.buttonTextTarget.textContent = "Create Secure Room"
+  }
+
   // Create a room on the server, generate the client key, and redirect with hash.
   createRoom(event) {
     event.preventDefault()
