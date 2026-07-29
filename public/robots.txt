@@ -40,5 +40,5 @@ User-agent: *
 Crawl-delay: 10
 Request-rate: 1/5s
 
-# Sitemap (if you decide to add one in the future)
-# Sitemap: https://nullroom.io/sitemap.xml
+# Sitemap
+Sitemap: https://nullroom.io/sitemap.xml
