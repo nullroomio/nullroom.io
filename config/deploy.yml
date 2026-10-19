@@ -132,6 +132,7 @@ accessories:
       user: "0:0"
       log-driver: "none"
     volumes:
+      # Kept in sync with certbot by config/coturn/certbot-deploy-hook.sh on the host.
       - /var/lib/coturn/certs:/var/lib/coturn/certs:ro
     files:
       - config/coturn/turnserver.conf:/etc/turnserver.conf
