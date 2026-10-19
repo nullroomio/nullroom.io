@@ -44,6 +44,19 @@ class RoomsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "show is noindex and declares no canonical URL" do
+    with_stubbed_redis do |redis|
+      room_id = SecureRandom.uuid
+      redis.setex("room:#{room_id}", 900, "active")
+
+      get "/rooms/#{room_id}"
+
+      assert_response :success
+      assert_select 'meta[name="robots"][content="noindex, nofollow, noarchive"]'
+      assert_select 'link[rel="canonical"]', count: 0
+    end
+  end
+
   # --- Provider dispatch (cloudflare) ---
 
   test "create uses CloudflareTurnService when provider is cloudflare" do

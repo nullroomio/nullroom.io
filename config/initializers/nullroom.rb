@@ -48,6 +48,10 @@ module Nullroom
     # How long a successful donation unlock is kept in the browser session.
     DONATION_SESSION_UNLOCK_TTL_SECONDS = integer_env("NULLROOM_DONATION_SESSION_UNLOCK_TTL_SECONDS", 12 * 60 * 60)
 
+    # Canonical origin for search engines (canonical tags, sitemap, structured data).
+    # Cloudflare 301s www.nullroom.io to this apex host.
+    CANONICAL_ORIGIN = "https://nullroom.io"
+
     # TURN provider: "coturn" (self-hosted) or "cloudflare" (API-based).
     # Override with NULLROOM_TURN_PROVIDER in environment.
     TURN_PROVIDER = ENV.fetch("NULLROOM_TURN_PROVIDER", "coturn").freeze

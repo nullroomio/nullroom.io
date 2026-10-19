@@ -1,17 +1,26 @@
 <!DOCTYPE html>
-<html data-env="<%= Rails.env %>" data-commit-sha="<%= commit_sha %>">
+<html lang="en" data-env="<%= Rails.env %>" data-commit-sha="<%= commit_sha %>">
   <head>
-    <title><%= content_for?(:title) ? yield(:title) : "Nullroom | Post-Quantum Safe E2EE Temporary Messaging" %></title>
-    <meta name="description" content="<%= content_for?(:description) ? yield(:description) : "Nullroom is a post-quantum safe, zero-knowledge ephemeral messaging space. Defeat 'harvest now, decrypt later' attacks with peer-to-peer encryption, no server logs, and zero data retention." %>">
+    <% title = content_for?(:title) ? yield(:title) : "Nullroom | Private Encrypted Chat Room, No Sign-Up, No Logs" %>
+    <% description = content_for?(:description) ? yield(:description) : "Free end-to-end encrypted chat room in your browser. No account, no app, no logs. Post-quantum safe, peer-to-peer messages and files that vanish when you close the tab." %>
+    <title><%= title %></title>
+    <meta name="description" content="<%= description %>">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="referrer" content="no-referrer">
+    <% if content_for?(:robots) %>
+      <meta name="robots" content="<%= yield(:robots) %>">
+    <% else %>
+      <link rel="canonical" href="<%= canonical_url %>">
+    <% end %>
 
     <%# Open Graph & Twitter Cards %>
-    <meta property="og:title" content="<%= content_for?(:title) ? yield(:title) : 'Nullroom | Post-Quantum Safe E2EE Temporary Messaging' %>">
-    <meta property="og:description" content="<%= content_for?(:description) ? yield(:description) : 'Zero-trace peer-to-peer messaging inside your browser to defeat harvest now, decrypt later attacks.' %>">
+    <meta property="og:site_name" content="nullroom">
+    <meta property="og:title" content="<%= title %>">
+    <meta property="og:description" content="<%= description %>">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="<%= request.original_url %>">
-    <meta name="twitter:card" content="summary_large_image">
+    <meta property="og:url" content="<%= canonical_url %>">
+    <meta property="og:image" content="<%= Nullroom::Config::CANONICAL_ORIGIN %>/icon.png">
+    <meta name="twitter:card" content="summary">
 
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="application-name" content="nullroom">
@@ -32,17 +41,41 @@
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "nullroom",
-      "applicationCategory": "CommunicationApplication",
-      "operatingSystem": "Any format with a modern browser",
-      "offers": {
-        "@type": "Offer",
-        "price": "0.00",
-        "priceCurrency": "USD"
-      },
-      "description": "A post-quantum zero-knowledge encrypted messaging platform immune to Harvest Now, Decrypt Later.",
-      "sameAs": ["https://github.com/nullroomio/nullroom.io"]
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://nullroom.io/#organization",
+          "name": "nullroom",
+          "url": "https://nullroom.io/",
+          "logo": "https://nullroom.io/icon.png",
+          "sameAs": ["https://github.com/nullroomio/nullroom.io"]
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://nullroom.io/#website",
+          "name": "nullroom",
+          "alternateName": ["Nullroom", "null room", "nullroom.io"],
+          "url": "https://nullroom.io/",
+          "publisher": { "@id": "https://nullroom.io/#organization" }
+        },
+        {
+          "@type": "WebApplication",
+          "@id": "https://nullroom.io/#app",
+          "name": "nullroom",
+          "url": "https://nullroom.io/",
+          "applicationCategory": "CommunicationApplication",
+          "operatingSystem": "Web browser",
+          "browserRequirements": "Requires a modern browser with WebRTC and Web Crypto support.",
+          "isAccessibleForFree": true,
+          "offers": {
+            "@type": "Offer",
+            "price": "0.00",
+            "priceCurrency": "USD"
+          },
+          "description": "A post-quantum zero-knowledge encrypted messaging platform immune to Harvest Now, Decrypt Later.",
+          "publisher": { "@id": "https://nullroom.io/#organization" }
+        }
+      ]
     }
     </script>
 

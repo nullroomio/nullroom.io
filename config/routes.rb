@@ -12,7 +12,8 @@ Rails.application.routes.draw do
   root "rooms#index"
 
   # Room routes for nullroom P2P messaging
-  resources :rooms, only: [ :index, :create, :show ]
+  # No :index: GET /rooms would duplicate the landing page served at root.
+  resources :rooms, only: [ :create, :show ]
 
   # Zero-knowledge handshake (ephemeral code-based room sharing)
   post "handshakes/:id", to: "handshakes#create"
