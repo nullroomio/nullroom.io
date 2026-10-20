@@ -4,6 +4,10 @@ Rails.application.routes.draw do
   # Health status on /up that includes a Redis write check.
   get "up" => "health#show", as: :rails_health_check
 
+  # Public status page with deep checks of every critical path (also /status.json).
+  get "status" => "status#show", as: :status_page
+  get "status/checks" => "status#checks", as: :status_checks
+
   # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker

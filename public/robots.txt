@@ -8,6 +8,8 @@ Disallow: /rooms
 Disallow: /cable
 # Health check endpoint
 Disallow: /up
+# Status page fragment (the page itself is noindex)
+Disallow: /status/checks
 # Handshake and donation APIs
 Disallow: /handshakes/
 Disallow: /blind_tokens/

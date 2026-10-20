@@ -1,0 +1,40 @@
+<% content_for :title, "System Status | Nullroom" %>
+<% content_for :description, "Live status of nullroom's signaling, TURN relay, TLS certificates and donation services." %>
+<% content_for :robots, "noindex, nofollow" %>
+<%# ── Status ───────────────────────────────────────────────────────── %>
+<div class="w-full min-h-screen">
+  <%# ── Top nav ─────────────────────────────────────────────────────── %>
+  <header class="flex items-center justify-between px-6 py-5 max-w-2xl mx-auto">
+    <%= render "shared/logo", size: "sm" %>
+    <span class="text-xs font-mono text-secure-gray tracking-wide">System Status</span>
+  </header>
+  <%# ── Content ─────────────────────────────────────────────────────── %>
+  <div class="max-w-2xl mx-auto px-6 pb-16 text-trace-white font-sans">
+    <%= render "shared/pages_nav", active: :status %>
+    <h1 class="text-3xl font-semibold mb-6 mt-8">System Status</h1>
+
+    <%# Checks can take a few seconds when the cache is cold, so they load after the page. %>
+    <%= turbo_frame_tag "status-checks", src: status_checks_path do %>
+      <%= render "pending" %>
+    <% end %>
+
+    <div class="space-y-6 mt-6">
+      <div>
+        <h3 class="text-sm font-semibold text-trace-white mb-3">Release</h3>
+        <dl class="space-y-2">
+          <div class="glass px-4 py-3 flex flex-col sm:flex-row sm:gap-4">
+            <dt class="text-xs font-mono text-status-blue shrink-0 sm:w-48">Commit</dt>
+            <dd class="text-sm text-secure-gray mt-1 sm:mt-0 font-mono break-all"><%= commit_sha %></dd>
+          </div>
+        </dl>
+      </div>
+
+      <p class="text-xs text-secure-gray leading-relaxed">
+        Checks run at most once a minute and exercise each path the way a browser does: real TLS handshakes,
+        a STUN binding and a TURN allocation against the relay, and a message round-trip through signaling.
+        Machine-readable at <a href="/status.json" class="font-mono text-status-blue hover:underline">/status.json</a>
+        (HTTP 503 when a critical component is not operational).
+      </p>
+    </div>
+  </div>
+</div>

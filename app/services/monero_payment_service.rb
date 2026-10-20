@@ -10,9 +10,24 @@ class MoneroPaymentService
       url:            rpc_url,
       username:       rpc_username,
       password:       rpc_password,
-      tor_socks_host: tor_socks_host,
-      tor_socks_port: tor_socks_port
+      tor_socks_host: self.class.tor_socks_host,
+      tor_socks_port: self.class.tor_socks_port
     )
+  end
+
+  def self.tor_socks_host
+    Rails.application.credentials.dig(:monero, :tor_socks_host).presence ||
+      ENV["NULLROOM_MONERO_TOR_SOCKS_HOST"].presence ||
+      "nullroom-tor"
+  end
+
+  def self.tor_socks_port
+    raw = Rails.application.credentials.dig(:monero, :tor_socks_port).presence ||
+      ENV["NULLROOM_MONERO_TOR_SOCKS_PORT"].presence ||
+      "9150"
+    Integer(raw)
+  rescue ArgumentError
+    0
   end
 
   # Creates a unique payment address in account 0.
@@ -34,7 +49,7 @@ class MoneroPaymentService
     idx = Integer(address_index)
     available = @client.call("incoming_transfers", transfer_type: "all").fetch("transfers", [])
     pending   = incoming_pending_transfers
-    wallet_height = current_wallet_height
+    wallet_height = self.wallet_height
 
     matching_available = available.select { |tx| tx.dig("subaddr_index", "minor") == idx }
     matching_pending   = pending.select   { |tx| tx.dig("subaddr_index", "minor") == idx }
@@ -53,6 +68,11 @@ class MoneroPaymentService
     raise
   end
 
+  # Current wallet block height; the status page uses it as a liveness probe.
+  def wallet_height
+    @client.call("get_height").fetch("height", 0)
+  end
+
   private
 
   def incoming_pending_transfers
@@ -63,10 +83,6 @@ class MoneroPaymentService
     @client.call("incoming_transfers", transfer_type: "unavailable").fetch("transfers", [])
   end
 
-  def current_wallet_height
-    @client.call("get_height").fetch("height", 0)
-  end
-
   # Computes confirmations from wallet height and tx block_height.
   # incoming_transfers does not return a confirmations field directly.
   # A tx in block N with wallet height N has 1 confirmation.
@@ -75,20 +91,5 @@ class MoneroPaymentService
     return 0 if block_height <= 0 || wallet_height <= 0
 
     [ wallet_height - block_height + 1, 0 ].max
-  end
-
-  def tor_socks_host
-    Rails.application.credentials.dig(:monero, :tor_socks_host).presence ||
-      ENV["NULLROOM_MONERO_TOR_SOCKS_HOST"].presence ||
-      "nullroom-tor"
-  end
-
-  def tor_socks_port
-    raw = Rails.application.credentials.dig(:monero, :tor_socks_port).presence ||
-      ENV["NULLROOM_MONERO_TOR_SOCKS_PORT"].presence ||
-      "9150"
-    Integer(raw)
-  rescue ArgumentError
-    0
   end
 end

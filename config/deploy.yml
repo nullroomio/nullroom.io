@@ -68,6 +68,8 @@ env:
     NULLROOM_DONATION_AMOUNT_PICONERO: 4000000000
     # Coturn host for health checks (floating IP, since Coturn runs with network:host).
     COTURN_HOST: <%= ENV['KAMAL_COTURN_IP'] %>
+    # Origin host for the status page's kamal-proxy certificate check (bypasses Cloudflare).
+    NULLROOM_ORIGIN_HOST: <%= ENV['KAMAL_WEB_IP'] %>
   secret:
     - RAILS_MASTER_KEY
     - REDIS_URL

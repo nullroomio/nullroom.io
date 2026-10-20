@@ -21,6 +21,11 @@ class Rack::Attack
     req.ip if req.get? && req.path == "/up"
   end
 
+  # A page view is two requests (shell + checks frame), and the frame reloads every minute.
+  throttle("status", limit: 20, period: 60.seconds) do |req|
+    req.ip if req.get? && [ "/status", "/status.json", "/status/checks" ].include?(req.path)
+  end
+
   self.throttled_responder = lambda do |request|
     match_data = request.env["rack.attack.match_data"] || {}
     retry_after = match_data[:period].to_i

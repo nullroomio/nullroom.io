@@ -3,8 +3,16 @@
     {
       "fingerprint": "2f0d4fd13441c3c2aaf09a135ed7c70381b4f96bdaed3d700376757eaabe51e2",
       "note": "False positive: Open3.capture3 with array form does not invoke a shell. Values come from server config, not user input."
+    },
+    {
+      "fingerprint": "84eeafe68a951ac2abf567fa5d1474a8c71e6df863602a00d1b695cf7603d58e",
+      "note": "Intentional: the status page cert check handshakes without verification so expired/untrusted certs can still be inspected, then verifies chain, hostname and expiry itself. No data is exchanged over the connection."
+    },
+    {
+      "fingerprint": "f05ef9bbd7a16b9d7c9959726aad1d32958379b983cc13e2196c168dce00100e",
+      "note": "Intentional: the TURN allocation health check isolates relay/auth failures from cert failures; certificate validity is verified separately by HealthChecks::TlsCertCheck. Only short-lived health-check credentials are sent."
     }
   ],
-  "updated": "2026-05-15",
+  "updated": "2026-10-20",
   "brakeman_version": "8.0.4"
 }

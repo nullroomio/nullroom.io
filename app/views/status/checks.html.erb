@@ -1,0 +1,37 @@
+<%= turbo_frame_tag "status-checks" do %>
+  <% if @report.nil? %>
+    <%# First run still in progress: poll again shortly. %>
+    <div data-controller="status-refresh" data-status-refresh-interval-value="3000">
+      <%= render "pending" %>
+    </div>
+  <% else %>
+    <div data-controller="status-refresh" class="glass px-4 py-4 mb-8 flex items-center gap-3">
+      <span class="w-2.5 h-2.5 rounded-full shrink-0 <%= status_dot_class(@report["status"]) %>"></span>
+      <span class="text-sm font-semibold <%= status_text_class(@report["status"]) %>">
+        <%= status_headline(@report["status"]) %>
+      </span>
+      <time class="ml-auto text-xs font-mono text-secure-gray" datetime="<%= @report["checked_at"] %>">
+        checked <%= time_ago_in_words(Time.iso8601(@report["checked_at"])) %> ago
+      </time>
+    </div>
+
+    <div class="space-y-6">
+      <% status_groups(@report).each do |group, components| %>
+        <div>
+          <h3 class="text-sm font-semibold text-trace-white mb-3"><%= status_group_title(group) %></h3>
+          <dl class="space-y-2">
+            <% components.each do |component| %>
+              <div class="glass px-4 py-3 flex items-center justify-between gap-4">
+                <dt class="text-xs font-mono text-status-blue break-all"><%= component["name"] %></dt>
+                <dd class="text-xs font-mono flex items-center gap-2 shrink-0 <%= status_text_class(component["status"]) %>">
+                  <span class="w-2 h-2 rounded-full <%= status_dot_class(component["status"]) %>"></span>
+                  <%= status_label(component["status"]) %>
+                </dd>
+              </div>
+            <% end %>
+          </dl>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>
