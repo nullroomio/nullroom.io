@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="public/icon.svg" alt="nullroom logo" width="80" height="80" />
+  <img src="public/icon.png" alt="nullroom logo" width="96" height="96" />
 
   # nullroom.io
 
