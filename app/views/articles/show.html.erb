@@ -1,0 +1,49 @@
+<% content_for :title, "#{@article.title} | Nullroom" %>
+<% content_for :description, @article.description %>
+<% content_for :og_type, "article" %>
+
+<% content_for :head do %>
+<script type="application/ld+json"><%= json_escape(article_json_ld(@article).to_json).html_safe %></script>
+<% end %>
+
+<div class="w-full min-h-screen">
+  <header class="flex items-center justify-between px-6 py-5 max-w-2xl mx-auto">
+    <%= render "shared/logo", size: "sm" %>
+    <span class="text-xs font-mono text-secure-gray tracking-wide">Zero-Knowledge Architecture</span>
+  </header>
+
+  <article class="max-w-2xl mx-auto px-6 pb-16 text-trace-white font-sans mt-8">
+    <%= render "shared/pages_nav", active: :learn %>
+
+    <h1 class="text-3xl font-semibold mb-4 leading-tight"><%= @article.headline %></h1>
+    <p class="text-base text-secure-gray leading-relaxed mb-4"><%= @article.dek %></p>
+    <p class="text-xs font-mono text-secure-gray mb-8">
+      By <%= Article::AUTHOR %> ·
+      <time datetime="<%= @article.published_on.iso8601 %>"><%= @article.published_on.strftime("%B %-d, %Y") %></time> ·
+      <%= @article.reading_minutes %> min read
+    </p>
+
+    <div class="article-body">
+      <%= render @article.partial %>
+    </div>
+
+    <% related = Article.all - [ @article ] %>
+    <% if related.any? %>
+      <aside class="pt-8 mt-10 border-t border-white/8">
+        <h2 class="text-xs font-mono text-secure-gray tracking-wide uppercase mb-4">Keep reading</h2>
+        <ul class="space-y-3">
+          <% related.each do |article| %>
+            <li><%= link_to article.headline, article_path(article), class: "text-sm text-trace-white hover:text-status-blue transition-colors" %></li>
+          <% end %>
+        </ul>
+      </aside>
+    <% end %>
+
+    <div class="pt-8 mt-8 border-t border-white/8 text-center text-sm font-mono">
+      <%= link_to root_path, class: "inline-flex items-center gap-2 text-xs font-mono text-secure-gray hover:text-trace-white transition-colors" do %>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Back to Room Creator
+      <% end %>
+    </div>
+  </article>
+</div>

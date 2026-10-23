@@ -1,0 +1,115 @@
+<h2 id="the-archive-that-s-already-built">The Archive That's Already Built</h2>
+<p>Somewhere, on storage infrastructure you will never see, a copy of your organization's encrypted traffic is sitting in a queue.</p>
+<p>Not yesterday's traffic. Years of it. TLS sessions, VPN tunnels, encrypted messaging payloads — captured in bulk at the network layer, compressed, and archived. The adversary who collected it cannot read it today. They are not trying to. They are waiting.</p>
+<p>This is the "Harvest Now, Decrypt Later" strategy, and in 2026 it is no longer a threat model reserved for national security briefings. It is the baseline assumption of modern cybersecurity policy.</p>
+<p>The logic is straightforward: classical encryption — RSA, ECDH, the key exchanges underpinning virtually every secure connection on the internet — will not survive a cryptographically relevant quantum computer (CRQC). The timeline to CRQC is debated, but the consensus has narrowed. Whether it is seven years or fifteen, the encrypted data being harvested today has a shelf life measured in decades. Corporate intellectual property, legal strategy, medical records, source identities — any data whose sensitivity outlasts the algorithm protecting it is already compromised in principle. The decryption is just deferred.</p>
+<p>The question is no longer <em>whether</em> this is happening. The question is what your architecture is doing about it.</p>
+<h2 id="the-threat-is-no-longer-theoretical">The Threat Is No Longer Theoretical</h2>
+<p>The transition to post-quantum standards has become a global mandate. The White House's March 2026 Cyber Strategy designated post-quantum cryptography as a federal infrastructure priority — not a research initiative, not a recommendation, but a requirement. The UK's National Cyber Security Centre has set a 2035 migration deadline for all critical systems. These are not aspirational targets. They are direct responses to the HNDL strategy currently employed by well-funded state actors.</p>
+<p>The starting gun was fired in August 2024, when NIST formalized FIPS 203 (ML-KEM) as the global standard for quantum-resistant key encapsulation. That formalization was an acknowledgment by the world's top cryptographers that the threat of future decryption is real, imminent enough to standardize against, and too consequential to defer.</p>
+<p>Meanwhile, the rise of sovereign data strategies has made state-level data harvesting a top factor in global cyber risk assessments. The operating assumption across intelligence and enterprise security communities is clear: every encrypted packet sent over a centralized server today is a candidate for a future adversary's intelligence library.</p>
+<p>Organizations that treat post-quantum migration as a distant infrastructure upgrade are misreading the threat. The harvest phase is not a future event. It is the present.</p>
+<h2 id="the-honey-pot-problem">The Honey Pot Problem</h2>
+<p>Here is where the conversation typically goes wrong.</p>
+<p>The standard response to HNDL is algorithmic: swap RSA and ECDH for ML-KEM, upgrade TLS, and the problem is solved. The ciphertext captured tomorrow will resist quantum decryption. This is correct — and insufficient.</p>
+<p>The reason is architectural. Most encrypted communication systems — including the ones upgrading to post-quantum algorithms — are built around a centralized server. That server relays messages, stores ciphertext (even if encrypted), logs connection metadata, and maintains account identity graphs. It is, by design, the single point where all data converges.</p>
+<p>For a "Harvest Now, Decrypt Later" adversary, a centralized server is not just a vulnerability. It is a gift. It is a single collection point for bulk capture. One tap, one compromised upstream provider, one lawful intercept order — and the adversary has not just a conversation, but an entire organization's communication archive. Encrypted, yes. But archived, indexed, and waiting.</p>
+<p>Even with end-to-end encryption, the server sees who connected, when, for how long, and with whom. This metadata — the relationship graph — is not protected by any encryption algorithm, classical or quantum. It does not need to be decrypted. It is already in the clear.</p>
+<p>Post-quantum algorithms protect the <em>content</em> of the conversation. They do nothing to protect the <em>fact that the conversation happened</em>, or to prevent the ciphertext from being copied in transit through the server. As long as the architecture centralizes data flow, the harvest surface remains intact.</p>
+<p><strong>The server is the attack surface. Not the algorithm.</strong></p>
+<h2 id="math-is-not-enough">Math Is Not Enough</h2>
+<p>This is the structural argument that the industry has been slow to internalize.</p>
+<p>ML-KEM-768 is the right cryptographic primitive. It is lattice-based, standardized by NIST at Security Level 3, and designed to resist both classical and quantum attacks on key encapsulation. Deploying it is necessary. But deploying it inside the same centralized architecture that created the HNDL vulnerability in the first place is like upgrading the lock on the front door of a building with a surveillance camera recording everyone who enters.</p>
+<p>The lock is stronger. The camera is still running.</p>
+<p>To be genuinely quantum-safe, you don't just need a better algorithm. You need a better architecture — one where there is no central server to tap, no ciphertext archive to build, and no metadata trail to analyze.</p>
+<p>You need to eliminate the harvest surface entirely.</p>
+<h2 id="the-structural-defense-eliminating-the-harvest-phase">The Structural Defense: Eliminating the Harvest Phase</h2>
+<p><a href="/">nullroom.io</a> is built on a simple premise: if there is no server in the data path, there is nothing to harvest.</p>
+<p>This is not a marketing claim. It is an architectural constraint enforced at every layer of the system.</p>
+<h3 id="no-central-store">No Central Store</h3>
+<p>Messages are never written to a database. The server's only persistent-adjacent state is volatile Redis — two keys per room, both with automatic expiration:</p>
+<div class="article-table"><table><thead><tr><th>Key</th><th>TTL</th><th>Purpose</th></tr></thead><tbody><tr><td><code>room:&lt;uuid&gt;</code></td><td>15 min</td><td>Room existence marker</td></tr><tr><td><code>room:&lt;uuid&gt;:count</code></td><td>16 min</td><td>Participant counter (max 2)</td></tr></tbody></table></div>
+<p>That is the entirety of the server-side footprint. No message content, no ciphertext blobs, no user records. When the TTL expires — or when a participant closes the tab — the keys are gone. There is no backup, no replication, no archive.</p>
+<h3 id="zero-knowledge-signaling">Zero-Knowledge Signaling</h3>
+<p>The server facilitates the initial WebRTC handshake — relaying SDP offers and ICE candidates so the two browsers can find each other. It does this without possessing the encryption key.</p>
+<p>The key is generated client-side via the Web Crypto API and placed in the URL fragment — the part after the <code>#</code> symbol. This is not a design choice unique to nullroom; it is a property of the HTTP specification. <a href="https://www.rfc-editor.org/rfc/rfc3986#section-3.5" rel="noopener noreferrer">Browsers do not send the URL fragment to the server</a> — a guarantee nullroom uses to keep the encryption key strictly local, ensuring that even the server facilitating the connection is structurally incapable of decrypting anything that passes through the room.</p>
+<h3 id="the-hybrid-handshake">The Hybrid Handshake</h3>
+<p>Once the peer-to-peer connection is established, nullroom performs two simultaneous key exchanges — one classical and one post-quantum — and fuses both results into a single hybrid session key:</p>
+<pre><code>Classical Layer              Post-Quantum Layer
+─────────────                ──────────────────
+AES-GCM-256 key              ML-KEM-768 (FIPS 203)
+generated in browser          key exchange over P2P channel
+        │                              │
+        └──────────┐    ┌──────────────┘
+                   ▼    ▼
+            Key Derivation (HKDF-SHA-256)
+                   │
+                   ▼
+          Hybrid Session Key
+          ═══════════════════
+          Both layers must be broken
+          to compromise the session</code></pre>
+<p>The classical key provides proven, battle-tested security. The post-quantum key provides resistance to future quantum attacks. The hybrid derivation ensures that <strong>neither key alone is sufficient</strong> — an adversary would need to independently compromise both the classical cryptography <em>and</em> the lattice-based ML-KEM scheme. This is defense in depth at the cryptographic layer: if one primitive falls, the other still holds.</p>
+<p>The post-quantum key exchange runs entirely over the peer-to-peer data channel. The server is not involved. There is no intermediary that could capture the quantum-resistant shared secret.</p>
+<h3 id="transient-keys">Transient Keys</h3>
+<p>Every encryption key in a nullroom session — the classical key, the quantum shared secret, and the derived hybrid session key — exists only in the browser's volatile memory. They are never written to disk, never transmitted to a server, and never persisted beyond the lifetime of the tab.</p>
+<p>Close the tab, and the keys are gone. There is no key escrow, no recovery mechanism, and no forensic artifact to extract. The cryptographic material that protected the conversation is destroyed with the same finality as the conversation itself.</p>
+<h3 id="no-ciphertext-to-harvest">No Ciphertext to Harvest</h3>
+<p>This is the structural point that ties everything together.</p>
+<pre><code>  Centralized E2EE
+  ════════════════
+
+  ┌────────┐    ┌────────────┐    ┌────────┐
+  │ User A │───▶│   Server   │───▶│ User B │
+  └────────┘    │            │    └────────┘
+                │ ● Ciphertext
+                │   archived │
+                │ ● Metadata │
+                │   logged   │
+                │ ● Traffic  │
+                │   recorded │
+                └─────┬──────┘
+                      │
+                 ┌────▼────┐
+                 │ Harvest │
+                 │ Surface │
+                 └─────────┘
+
+  nullroom P2P
+  ════════════
+
+  ┌────────┐                      ┌────────┐
+  │ User A │◀════════════════════▶│ User B │
+  └────────┘   Direct P2P link    └────────┘
+               (WebRTC)
+               ● No server in data path
+               ● No ciphertext to copy
+               ● No metadata logged
+               ● No traffic to analyze
+
+                     ┌────────────┐
+                     │   Server   │  (signaling only)
+                     │  ○ No keys │
+                     │  ○ No data │
+                     │  ○ No logs │
+                     └────────────┘</code></pre>
+<p>In a centralized architecture, even with end-to-end encryption, the ciphertext transits the server. It can be copied, archived, and queued for future decryption. The server is in the data path — and the data path is the harvest surface.</p>
+<p>In nullroom, messages travel directly between browsers over WebRTC. The server is not in the data path. There is no ciphertext transiting a central point. There is no central point. An adversary performing bulk collection at the server layer would capture signaling metadata — SDP payloads, ICE candidates — but zero message content, zero encryption keys, and zero ciphertext.</p>
+<p>There is nothing to harvest. Not because the data is well-protected, but because <strong>the data is not there.</strong></p>
+<h2 id="why-not-just-upgrade-the-algorithm">"Why Not Just Upgrade the Algorithm?"</h2>
+<p>This is the question that serious security teams are asking, and it deserves a direct answer.</p>
+<p>Major messaging platforms are integrating post-quantum key exchange into their protocols. This is the right move, and it will meaningfully improve the security of billions of conversations. But it does not eliminate the HNDL attack surface. It narrows it.</p>
+<p>Here is why:</p>
+<p><strong>Ciphertext still transits the server.</strong> Even with ML-KEM protecting the key exchange, the encrypted message payloads still flow through centralized infrastructure. That ciphertext can be captured and archived. If a flaw is discovered in ML-KEM — or if a novel quantum attack defeats lattice-based cryptography — the archived ciphertext becomes readable. The harvest surface is reduced but not eliminated.</p>
+<p><strong>Account identity persists.</strong> These platforms require a phone number, an email address, or both. That identity is permanent. It ties every conversation — past and future — to a recoverable account. A subpoena for account records reveals the entire relationship graph, regardless of encryption strength.</p>
+<p><strong>Metadata remains in the clear.</strong> Who connected to whom, when, how often, and for how long. No encryption algorithm — classical or quantum — protects this data on a centralized platform, because the server needs it to function. For data with long-term sensitivity — whistleblower identities, legal strategy, source relationships — the metadata alone is the compromise.</p>
+<p><strong>Traffic analysis is still viable.</strong> Even when message content is opaque, a server-based architecture allows an adversary to observe the size, timing, and frequency of encrypted packets — enough to fingerprint the type of content being exchanged (a short text reply versus a multi-megabyte document transfer, for instance). In nullroom's P2P model, that traffic flows directly between browsers and never reaches a central observer capable of performing this analysis at scale.</p>
+<p>Upgrading the algorithm is necessary. It is not sufficient. The architecture must change.</p>
+<h2 id="the-zero-mandate">The Zero Mandate</h2>
+<p>"Crypto-agility" has become one of the defining terms of the 2026 security landscape. It typically refers to the ability to swap cryptographic primitives as standards evolve — to rotate from RSA to ML-KEM without rebuilding the entire stack.</p>
+<p>But there is a deeper form of agility that the term misses: the ability to leave nothing behind. Not just stronger encryption, but <strong>no stored ciphertext to attack.</strong> Not just better key exchange, but <strong>no persistent keys to compromise.</strong> Not just metadata minimization, but <strong>no metadata to minimize.</strong></p>
+<p>In the quantum era, the only data safe from future decryption is the data that was never recorded in the first place.</p>
+<p>The HNDL threat does not ask whether your encryption is strong enough today. It asks whether your architecture creates an archive that an adversary can revisit in ten years. If your communication system has a server with a memory — a database, a log, an account record, a stored ciphertext blob — the answer is yes.</p>
+<p>The mandate is zero. Zero storage. Zero logs. Zero server memory. Zero trace.</p>
+<p><strong><a href="/">nullroom.io</a> — The conversation that never happened.</strong></p>
+<p><em>nullroom is open source and independently auditable. Review the architecture, verify the claims, and read every line of code on <a href="https://github.com/nullroomio/nullroom.io" rel="noopener noreferrer">GitHub</a>.</em></p>

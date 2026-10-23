@@ -38,6 +38,10 @@ Rails.application.routes.draw do
   get "use-cases" => "pages#use_cases", as: :use_cases_page
   get "cli" => "pages#cli", as: :cli_page
 
+  # Long-form articles
+  get "learn" => "articles#index", as: :articles
+  get "learn/:slug" => "articles#show", as: :article
+
   # ActionCable mount point for WebSocket connections
   mount ActionCable.server => "/cable"
 end

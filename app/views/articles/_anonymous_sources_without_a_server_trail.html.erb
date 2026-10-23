@@ -1,0 +1,51 @@
+<p>Picture this. A government contractor has evidence of misappropriated funds - billions routed through shell accounts. They want to talk to you. They know your byline, they trust your reporting, and they are ready to share documents.</p>
+<p>But they work inside a building where personal devices are scanned, network traffic is logged, and installing an unfamiliar app would raise an immediate red flag. They need to reach you without leaving a trace - not just of what was said, but that any conversation happened at all.</p>
+<p>In 2026, this is the problem that matters most.</p>
+<h2 id="the-harvest-now-decrypt-later-threat">The "Harvest Now, Decrypt Later" Threat</h2>
+<p>Here is a reality that most journalists haven't caught up with yet: intelligence agencies and well-funded adversaries are <strong>archiving encrypted traffic today</strong> with the expectation that quantum computers will crack it tomorrow.</p>
+<p>It has a name - <strong>"Harvest Now, Decrypt Later."</strong> The encrypted Signal message you sent last year? The secure file transfer from 2024? If the ciphertext was captured in transit, it is sitting in a storage facility somewhere, waiting for the hardware to catch up.</p>
+<p>Classical encryption - the kind that protects almost every messaging app you use - was not designed to survive a quantum computer. When that hardware matures, the vault opens. Every archived conversation becomes readable.</p>
+<p>For everyday communication, this may be an acceptable risk. For a source whose identity could land them in prison or worse, it is not.</p>
+<h2 id="the-metadata-problem-your-breadcrumb-trail">The Metadata Problem: Your Breadcrumb Trail</h2>
+<p>Even if we set the quantum threat aside, there is a more immediate problem.</p>
+<p>In 2026, the biggest threat to a source isn't just the content of their messages - it's the fact that the message was sent at all.</p>
+<p>Apps like Signal and WhatsApp are fantastic for daily secure communication, but they require a phone number or an account. That account is a permanent anchor. It ties your identity to a contact graph - who you talked to, when, and how often.</p>
+<p>Even "disappearing messages" on these platforms have to pass through a central server first. If that server is compromised or subpoenaed, your connection metadata is exposed. The content may be encrypted, but the relationship is not. A prosecutor doesn't need to read the messages. They just need to prove that the communications analyst at the agency talked to the investigative reporter at the newspaper - at 2 a.m., four times in one week, two days before the story dropped.</p>
+<p>That metadata is a breadcrumb trail that leads straight to your source.</p>
+<p>If you are working with a whistleblower or a high-risk contact, your <strong>source hygiene</strong> needs to move beyond encryption. You need a <strong>zero-trace workflow</strong> - one where there is no server trail to follow, no account to subpoena, and no archived ciphertext to crack in 2035.</p>
+<h2 id="eliminating-the-server-trail">Eliminating the Server Trail</h2>
+<p>To eliminate the trail, you have to eliminate the server. This is where <strong>stateless, peer-to-peer communication</strong> comes in.</p>
+<p>The concept is simple: instead of routing your messages through a company's infrastructure - where they can be logged, stored, or handed over - the messages travel <strong>directly from your browser to your source's browser</strong>. No middleman touches the data. No server "remembers" the conversation. There is no database entry, no connection log, no account record.</p>
+<p>When the conversation ends, it vanishes. Not "marked for deletion in 30 days" vanishes. Not "removed from the UI but still on a backup server" vanishes. Actually gone - from RAM, from the network, from existence.</p>
+<h2 id="nullroom-the-ghost-room">nullroom: The Ghost Room</h2>
+<p><a href="/">nullroom.io</a> is built around this exact principle. It is designed to be a "ghost room" - a place where a conversation happens, and then doesn't exist.</p>
+<p>Here is what makes it different:</p>
+<p><strong>No app to install.</strong> It runs in a browser tab. Your source does not need to download anything, create an account, or hand over a phone number. In many jurisdictions, having a "suspicious" app on a phone is enough for probable cause. nullroom sidesteps that entirely. And because it is just a lightweight web page - no app syncing, no background processes - it works even on the kind of spotty mobile data you encounter in the field.</p>
+<p><strong>No server memory.</strong> Messages are never written to a database. The server's only job is to help the two browsers find each other - after that, it steps out of the way. All communication flows peer-to-peer over WebRTC.</p>
+<p><strong>The server never sees the encryption key.</strong> When you create a room, the key is generated in your browser and placed in the URL fragment - the part after the <code>#</code> symbol. By design, browsers never send the URL fragment to the server. The server knows a room exists. It never knows how to read it.</p>
+<p><strong>Quantum-resistant encryption.</strong> This is where nullroom addresses the "Harvest Now, Decrypt Later" threat directly. On top of classical encryption, it performs a <strong>post-quantum key exchange</strong> - using the same algorithm (ML-KEM-768) that NIST standardized for exactly this scenario. Your conversation is protected against both today's computers and tomorrow's quantum machines. Even if someone captures the encrypted traffic right now, they cannot decrypt it later.</p>
+<p><strong>Rooms self-destruct.</strong> A nullroom expires after 15 minutes. Close the tab, and the room is gone - from your browser, from the server, from everywhere. There is nothing to recover, nothing to forensically extract.</p>
+<h2 id="the-2026-zero-footprint-protocol">The 2026 Zero-Footprint Protocol</h2>
+<p>For investigative journalists, here is the recommended workflow for a sensitive first contact:</p>
+<h3 id="step-1-no-app-installs">Step 1: No App Installs</h3>
+<p>Do not ask a source to download a new app. Send them to a URL they can open in any browser. That is it.</p>
+<p>Go to <a href="/">nullroom.io</a> and click <strong>"Create Secure Room."</strong> A fresh, encrypted room is generated instantly.</p>
+<h3 id="step-2-share-the-room-without-the-network">Step 2: Share the Room - Without the Network</h3>
+<p>This is where nullroom gets clever. You have three ways to invite your source, depending on your threat model:</p>
+<ul><li><strong>QR Code (in person):</strong> If you can meet face-to-face - even briefly - your source scans a QR code from your screen. The code contains the room link and the encryption key, so both browsers know where to connect and how to decrypt - but the key itself transfers through the camera and never touches the network. This is the gold standard.</li><li><strong>4-Word Phrase (over a phone call):</strong> nullroom generates a short passphrase - something like <em>neon-zebra-piano-rocket</em>. Read it aloud over a voice call. Your source types it in on their end. The phrase is a one-time key that self-destructs after use or after three minutes, whichever comes first.</li><li><strong>Direct link (via a trusted channel):</strong> Copy the full URL and send it through whatever secure channel you already trust. The encryption key is embedded in the link.</li></ul>
+<h3 id="step-3-talk">Step 3: Talk</h3>
+<p>Once both of you are in the room, the connection upgrades automatically to a direct peer-to-peer link. Messages travel from browser to browser. The server is no longer in the loop. Every message is encrypted before it leaves your machine.</p>
+<h3 id="step-4-transfer-files-without-a-paper-trail">Step 4: Transfer Files Without a Paper Trail</h3>
+<p>If your source needs to send documents, do not use cloud storage links. Google Drive, Dropbox, and WeTransfer all log IP addresses, download times, and account activity. Those logs are subpoena-friendly.</p>
+<p>In nullroom, files move <strong>directly from their computer to yours</strong> - encrypted in transit, chunk by chunk. No cloud server ever touches the file. No download link persists after the session.</p>
+<h3 id="step-5-close-the-tab">Step 5: Close the Tab</h3>
+<p>The simplest security move in 2026? Close the browser tab.</p>
+<p>In a stateless environment like nullroom, closing the tab effectively shreds the room forever. The encryption keys are gone from memory. The messages are gone from the DOM. The room expires from the server's temporary state. Refreshing the URL returns "Invalid room link."</p>
+<p>There is nothing to hand over. There is nothing to recover. There is nothing.</p>
+<h2 id="the-bottom-line">The Bottom Line</h2>
+<p>The threat model for source protection has changed. Encryption alone is no longer sufficient when adversaries can store what they cannot yet read. Metadata alone is enough to expose a relationship. And any tool that requires an account, an install, or a server-side record is a tool that creates a trail.</p>
+<p>In an era of total surveillance, <strong>the safest data is the data that never existed.</strong></p>
+<p>By moving sensitive first contacts to stateless, peer-to-peer rooms - where messages live only in memory, encryption is quantum-resistant, and the server never holds a key - you ensure that even if you are compelled to hand over your devices later, there is no history to find.</p>
+<p>No account. No logs. No server memory. No trace.</p>
+<p><strong><a href="/">Start a ghost room at nullroom.io →</a></strong></p>
+<p><em>nullroom is open source and independently auditable. The code is available on <a href="https://github.com/nullroomio/nullroom.io" rel="noopener noreferrer">GitHub</a>.</em></p>

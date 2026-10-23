@@ -9,3 +9,9 @@ It runs entirely in the browser using WebRTC and WebCrypto primitives.
 - Threat Model Handled: "Harvest now, decrypt later" (HNDL). Since messages are completely ephemeral and never touch a database, there is zero cipher-text for an adversary to harvest.
 
 Target Audiences include: Journalists, IT Teams sharing credentials, Contractors, and Privacy Advocates.
+
+## Articles
+
+- [How nullroom's Encryption Works](https://nullroom.io/learn/how-nullroom-encryption-works): AES-GCM 256, URL-fragment keys, ML-KEM-768 and the HKDF hybrid key, step by step.
+- [Why "Harvest Now, Decrypt Later" Made Every Server a Liability](https://nullroom.io/learn/harvest-now-decrypt-later): why post-quantum algorithms alone don't remove the harvest surface.
+- [Communicating with Anonymous Sources Without a Server Trail](https://nullroom.io/learn/anonymous-sources-without-a-server-trail): a zero-footprint first-contact protocol for journalists.

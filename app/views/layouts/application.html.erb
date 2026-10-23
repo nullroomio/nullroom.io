@@ -17,7 +17,7 @@
     <meta property="og:site_name" content="nullroom">
     <meta property="og:title" content="<%= title %>">
     <meta property="og:description" content="<%= description %>">
-    <meta property="og:type" content="website">
+    <meta property="og:type" content="<%= content_for?(:og_type) ? yield(:og_type) : "website" %>">
     <meta property="og:url" content="<%= canonical_url %>">
     <meta property="og:image" content="<%= Nullroom::Config::CANONICAL_ORIGIN %>/icon.png">
     <meta name="twitter:card" content="summary">

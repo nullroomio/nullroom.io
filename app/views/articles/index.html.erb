@@ -1,0 +1,36 @@
+<% content_for :title, "Learn | Post-Quantum Encryption & Source Protection | Nullroom" %>
+<% content_for :description, "Articles on how nullroom's encryption works, Harvest Now, Decrypt Later (HNDL), and protecting sources with stateless, peer-to-peer messaging." %>
+
+<div class="w-full min-h-screen">
+  <header class="flex items-center justify-between px-6 py-5 max-w-2xl mx-auto">
+    <%= render "shared/logo", size: "sm" %>
+    <span class="text-xs font-mono text-secure-gray tracking-wide">Zero-Knowledge Architecture</span>
+  </header>
+
+  <div class="max-w-2xl mx-auto px-6 pb-16 text-trace-white font-sans mt-8">
+    <%= render "shared/pages_nav", active: :learn %>
+
+    <h1 class="text-3xl font-semibold mb-6">Learn</h1>
+
+    <p class="text-sm text-secure-gray leading-relaxed mb-8">
+      How nullroom keeps conversations unreadable to everyone but the two people in the room, and why leaving nothing behind matters in the quantum era.
+    </p>
+
+    <div class="space-y-4">
+      <% @articles.each do |article| %>
+        <%= link_to article_path(article), class: "block glass px-5 py-4 hover:bg-white/5 transition-colors" do %>
+          <h2 class="text-base font-semibold text-trace-white mb-2"><%= article.headline %></h2>
+          <p class="text-sm text-secure-gray leading-relaxed mb-3"><%= article.dek %></p>
+          <p class="text-xs font-mono text-secure-gray"><%= article.reading_minutes %> min read</p>
+        <% end %>
+      <% end %>
+    </div>
+
+    <div class="pt-8 mt-8 border-t border-white/8 text-center text-sm font-mono">
+      <%= link_to root_path, class: "inline-flex items-center gap-2 text-xs font-mono text-secure-gray hover:text-trace-white transition-colors" do %>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Back to Room Creator
+      <% end %>
+    </div>
+  </div>
+</div>
