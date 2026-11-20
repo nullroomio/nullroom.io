@@ -128,6 +128,15 @@ accessories:
       memory-swap: 128m
       cpus: "0.50"
       log-driver: "none"
+      # The image's own healthcheck fetches a third-party onion site and always fails.
+      # Instead ask the Tor Project's checker through the proxy: a real circuit has to
+      # work for the answer to say IsTor:true. Rare (5m) so it does not build circuits
+      # constantly. An unhealthy flag restarts nothing; it is only a signal.
+      health-cmd: "curl -sf --max-time 20 --socks5-hostname localhost:9150 https://check.torproject.org/api/ip | grep -q 'IsTor.:true'"
+      health-interval: "5m"
+      health-timeout: "25s"
+      health-retries: "3"
+      health-start-period: "90s"
 
   # Coturn STUN/TURN server for WebRTC relay.
   coturn:
