@@ -118,7 +118,9 @@ accessories:
 
   # Tor SOCKS proxy for outbound anonymized traffic.
   tor:
-    image: ghcr.io/peterdavehello/tor-socks-proxy:latest
+    # Pinned by digest: upstream only publishes a floating `latest` tag on ghcr.io.
+    # This digest is the image that was running on 2026-11-20 (built 2024-06-24).
+    image: ghcr.io/peterdavehello/tor-socks-proxy:latest@sha256:25a8f4d8a4ced821abb544cf9ef64580e3bd8e29470b351133fa3220e5c3ea84
     host: <%= ENV['KAMAL_WEB_IP'] %>
     port: "127.0.0.1:9150:9150"
     options:
@@ -139,7 +141,10 @@ accessories:
       # Kept in sync with certbot by config/coturn/certbot-deploy-hook.sh on the host.
       - /var/lib/coturn/certs:/var/lib/coturn/certs:ro
     files:
-      - config/coturn/turnserver.conf:/etc/turnserver.conf
+      # Mode 600: the file is uploaded as 755 by default; keep it root-only.
+      - local: config/coturn/turnserver.conf
+        remote: /etc/turnserver.conf
+        mode: "600"
     env:
       clear:
         EXTERNAL_IP: <%= ENV['KAMAL_COTURN_IP'] %>
